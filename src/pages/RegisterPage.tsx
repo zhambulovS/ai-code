@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createClient } from "@supabase/supabase-js";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-
-// Initialize Supabase client
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!, 
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/integrations/supabase/client";
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,18 +64,6 @@ const RegisterPage = () => {
       });
 
       if (error) throw error;
-
-      // Insert user into custom users table
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user?.id,
-          email,
-          full_name: fullName,
-          role: userRole
-        });
-
-      if (insertError) throw insertError;
 
       toast({
         title: "Success",

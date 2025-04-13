@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   BookOpen, 
@@ -8,13 +8,21 @@ import {
   BarChart, 
   User, 
   LogIn, 
+  LogOut,
   Menu, 
   X
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const MainNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -39,13 +47,19 @@ const MainNavigation = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
-            {isLoggedIn ? (
-              <Link to="/profile">
-                <Button variant="ghost" className="text-gray-700 hover:text-primary">
-                  <User className="mr-1 h-4 w-4" />
-                  <span>Profile</span>
+            {user ? (
+              <>
+                <Link to="/profile">
+                  <Button variant="ghost" className="text-gray-700 hover:text-primary">
+                    <User className="mr-1 h-4 w-4" />
+                    <span>Profile</span>
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={handleLogout} className="text-gray-700">
+                  <LogOut className="mr-1 h-4 w-4" />
+                  <span>Log out</span>
                 </Button>
-              </Link>
+              </>
             ) : (
               <>
                 <Link to="/login">
@@ -98,17 +112,31 @@ const MainNavigation = () => {
                 <span>Leaderboard</span>
               </div>
             </Link>
-            {isLoggedIn ? (
-              <Link 
-                to="/profile" 
-                className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                <div className="flex items-center">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </div>
-              </Link>
+            {user ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLogout();
+                  }}
+                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
+                >
+                  <div className="flex items-center">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </div>
+                </button>
+              </>
             ) : (
               <>
                 <Link 
