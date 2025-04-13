@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      problems: {
+        Row: {
+          acceptance_rate: number | null
+          created_at: string | null
+          description: string
+          difficulty: string
+          id: number
+          memory_limit: number | null
+          tags: string[] | null
+          time_limit: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          acceptance_rate?: number | null
+          created_at?: string | null
+          description: string
+          difficulty: string
+          id?: number
+          memory_limit?: number | null
+          tags?: string[] | null
+          time_limit?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          acceptance_rate?: number | null
+          created_at?: string | null
+          description?: string
+          difficulty?: string
+          id?: number
+          memory_limit?: number | null
+          tags?: string[] | null
+          time_limit?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -27,6 +66,72 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: string | null
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          code: string
+          created_at: string | null
+          execution_time: number | null
+          id: string
+          language: string
+          memory_used: number | null
+          problem_id: number
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          execution_time?: number | null
+          id?: string
+          language: string
+          memory_used?: number | null
+          problem_id: number
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          execution_time?: number | null
+          id?: string
+          language?: string
+          memory_used?: number | null
+          problem_id?: number
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      test_cases: {
+        Row: {
+          created_at: string | null
+          expected_output: string
+          id: string
+          input: string
+          is_sample: boolean | null
+          problem_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          expected_output: string
+          id?: string
+          input: string
+          is_sample?: boolean | null
+          problem_id: number
+        }
+        Update: {
+          created_at?: string | null
+          expected_output?: string
+          id?: string
+          input?: string
+          is_sample?: boolean | null
+          problem_id?: number
         }
         Relationships: []
       }
