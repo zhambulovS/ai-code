@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 
+// Initialize Supabase client
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!, 
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
+
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -25,6 +32,7 @@ const RegisterPage = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,20 +57,43 @@ const RegisterPage = () => {
     
     try {
       setIsLoading(true);
-      // In a real application, this would be an API call to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating API call
-      
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: userRole
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      // Insert user into custom users table
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user?.id,
+          email,
+          full_name: fullName,
+          role: userRole
+        });
+
+      if (insertError) throw insertError;
+
       toast({
         title: "Success",
         description: "Your account has been created successfully",
       });
       
-      // Redirect to login page or onboarding flow
-      // window.location.href = "/login";
-    } catch (error) {
+      // Redirect to problems page
+      navigate("/problems");
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "There was an error creating your account",
+        description: error.message || "There was an error creating your account",
         variant: "destructive",
       });
     } finally {
