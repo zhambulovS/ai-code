@@ -47,8 +47,13 @@ export const executeCode = async (
           // Симуляция для задачи "Two Sum"
           if (input.includes("[") && input.includes("]")) {
             const lines = input.trim().split("\n");
-            const nums = JSON.parse(lines[0]);
-            const target = parseInt(lines[1]);
+            // Парсим массив чисел из первой строки
+            const numsString = lines[0].trim();
+            const numsMatch = numsString.match(/\[(.*?)\]/);
+            const nums = numsMatch ? JSON.parse(`[${numsMatch[1]}]`) : [];
+            
+            // Парсим целевое число из второй строки
+            const target = parseInt(lines[1].trim());
             
             // Упрощенная реализация алгоритма Two Sum для симуляции
             const map = new Map();
@@ -135,10 +140,13 @@ const normalizeOutput = (output: string): string => {
 // Вспомогательная функция для парсинга входных данных
 const parseInput = (input: string): any => {
   try {
-    // Если входные данные в формате JSON, пытаемся их распарсить
-    if (input.trim().startsWith("[") || input.trim().startsWith("{")) {
-      return JSON.parse(input);
+    // Проверяем, содержит ли ввод массив
+    const arrayMatch = input.match(/\[(.*?)\]/);
+    if (arrayMatch) {
+      // Извлекаем содержимое массива и парсим его
+      return arrayMatch[0];
     }
+    
     // Иначе возвращаем как есть
     return input;
   } catch {
