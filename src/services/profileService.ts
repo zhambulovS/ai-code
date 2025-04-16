@@ -45,6 +45,22 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile | nu
   return data;
 };
 
+export const updateUserProfile = async (userId: string, profileData: Partial<UserProfile>): Promise<UserProfile | null> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(profileData)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+
+  return data;
+};
+
 export const fetchUserAchievements = async (userId: string): Promise<Achievement[]> => {
   const { data, error } = await supabase
     .from('user_achievements')

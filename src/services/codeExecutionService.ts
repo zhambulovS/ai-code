@@ -1,10 +1,9 @@
-
 // Этот сервис симулирует выполнение кода и проверку решений
 // В реальном приложении здесь бы была интеграция с бэкендом для запуска кода
 
 import { TestCase } from "./problemsService";
 
-interface ExecutionResult {
+export interface ExecutionResult {
   output: string;
   success: boolean;
   executionTime: number;
@@ -12,7 +11,7 @@ interface ExecutionResult {
   error?: string;
 }
 
-interface TestResult {
+export interface TestResult {
   testCase: TestCase;
   output: string;
   expected: string;
@@ -145,4 +144,3 @@ const parseInputForTwoSum = (input: string): { nums: number[], target: number } 
     return { nums: [], target: 0 };
   }
 };
-

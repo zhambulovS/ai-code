@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,35 +22,60 @@ import {
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [favoriteTags, setFavoriteTags] = useState<FavoriteTag[]>([]);
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
     const loadProfileData = async () => {
-      const [profileData, achievementsData, tagsData, activityData] = await Promise.all([
-        fetchUserProfile(user.id),
-        fetchUserAchievements(user.id),
-        fetchFavoriteTags(user.id),
-        fetchActivityLog(user.id),
-      ]);
+      setLoading(true);
+      try {
+        const [profileData, achievementsData, tagsData, activityData] = await Promise.all([
+          fetchUserProfile(user.id),
+          fetchUserAchievements(user.id),
+          fetchFavoriteTags(user.id),
+          fetchActivityLog(user.id),
+        ]);
 
-      setProfile(profileData);
-      setAchievements(achievementsData);
-      setFavoriteTags(tagsData);
-      setActivityLog(activityData);
+        setProfile(profileData);
+        setAchievements(achievementsData);
+        setFavoriteTags(tagsData);
+        setActivityLog(activityData);
+      } catch (error) {
+        console.error("Error loading profile data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadProfileData();
-  }, [user]);
+  }, [user, navigate]);
 
-  if (!profile) {
+  const handleEditProfile = () => {
+    navigate("/edit-profile");
+  };
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Profile not found</h1>
+        <p className="mb-6">We couldn't load your profile data. Please try again later.</p>
       </div>
     );
   }
@@ -86,7 +112,7 @@ export default function ProfilePage() {
             </div>
           </div>
           
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleEditProfile}>
             <Settings className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
