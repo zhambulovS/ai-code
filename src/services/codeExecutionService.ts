@@ -38,42 +38,28 @@ export const executeCode = async (
         
         // Простая эмуляция для JavaScript
         if (language === "javascript") {
-          // Преобразуем входные данные в формат, понятный для JavaScript
-          const parsedInput = parseInput(input);
-          
-          // Это очень упрощенная симуляция для демонстрационных целей
-          // В реальном приложении код был бы выполнен в изолированной среде
-          
-          // Симуляция для задачи "Two Sum"
-          if (input.includes("[") && input.includes("]")) {
-            const lines = input.trim().split("\n");
-            // Парсим массив чисел из первой строки
-            const numsString = lines[0].trim();
-            const numsMatch = numsString.match(/\[(.*?)\]/);
-            const nums = numsMatch ? JSON.parse(`[${numsMatch[1]}]`) : [];
+          try {
+            // Парсим входные данные для задачи
+            const { nums, target } = parseInputForTwoSum(input);
             
-            // Парсим целевое число из второй строки
-            const target = parseInt(lines[1].trim());
+            // Создаем функцию из кода пользователя
+            // eslint-disable-next-line no-new-func
+            const userFunction = new Function('nums', 'target', `
+              ${code}
+              return twoSum(nums, target);
+            `);
             
-            // Упрощенная реализация алгоритма Two Sum для симуляции
-            const map = new Map();
-            for (let i = 0; i < nums.length; i++) {
-              const complement = target - nums[i];
-              if (map.has(complement)) {
-                output = JSON.stringify([map.get(complement), i]);
-                break;
-              }
-              map.set(nums[i], i);
-            }
-          } else {
-            // Для других задач: симулируем случайный успех или ошибку
-            success = Math.random() > 0.3;
-            if (!success) {
-              error = "Execution error: Code failed to produce expected output";
-              output = "Error";
-            } else {
-              output = "Simulated output for: " + input;
-            }
+            // Вызываем функцию пользователя с правильными аргументами
+            const result = userFunction(nums, target);
+            
+            // Преобразуем результат в строку для сравнения
+            output = JSON.stringify(result);
+            success = true;
+          } catch (e) {
+            success = false;
+            error = e instanceof Error ? e.message : "Ошибка выполнения кода";
+            output = "Error";
+            console.error("Code execution error:", e);
           }
         } else {
           // Для других языков просто возвращаем симулированный результат
@@ -89,7 +75,7 @@ export const executeCode = async (
         resolve({
           output,
           success,
-          executionTime: Math.floor(Math.random() * 100),
+          executionTime: Math.floor(Math.random() * 100) + 1, // Гарантируем ненулевое время
           memoryUsed: Math.floor(Math.random() * 10000),
           error
         });
@@ -97,7 +83,7 @@ export const executeCode = async (
         resolve({
           output: "Error",
           success: false,
-          executionTime: 0,
+          executionTime: 1, // Даже при ошибке показываем минимальное время
           memoryUsed: 0,
           error: e instanceof Error ? e.message : "Unknown error occurred"
         });
@@ -137,19 +123,26 @@ const normalizeOutput = (output: string): string => {
   return output.trim().replace(/\s+/g, " ");
 };
 
-// Вспомогательная функция для парсинга входных данных
-const parseInput = (input: string): any => {
+// Вспомогательная функция для парсинга входных данных для задачи Two Sum
+const parseInputForTwoSum = (input: string): { nums: number[], target: number } => {
   try {
-    // Проверяем, содержит ли ввод массив
-    const arrayMatch = input.match(/\[(.*?)\]/);
-    if (arrayMatch) {
-      // Извлекаем содержимое массива и парсим его
-      return arrayMatch[0];
-    }
+    // Разбиваем входные данные по строкам
+    const lines = input.trim().split("\n");
     
-    // Иначе возвращаем как есть
-    return input;
-  } catch {
-    return input;
+    // Парсим массив чисел из первой строки
+    let numsString = lines[0].trim();
+    // Удаляем квадратные скобки, если они есть
+    numsString = numsString.replace(/^\[|\]$/g, "");
+    // Парсим числа
+    const nums = numsString.split(",").map(n => parseInt(n.trim(), 10));
+    
+    // Парсим целевое число из второй строки
+    const target = parseInt(lines[1].trim(), 10);
+    
+    return { nums, target };
+  } catch (error) {
+    console.error("Error parsing input for Two Sum:", error);
+    return { nums: [], target: 0 };
   }
 };
+
