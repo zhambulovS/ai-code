@@ -11,6 +11,7 @@ import ProblemDetailPage from "./pages/ProblemDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import { Toaster } from "@/components/ui/toaster";
 
 // ScrollToTop component to ensure pages start at the top
 function ScrollToTop() {
@@ -40,6 +41,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+      <Toaster />
     </Router>
   );
 }

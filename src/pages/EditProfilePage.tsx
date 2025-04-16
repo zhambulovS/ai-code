@@ -2,44 +2,60 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Upload, User, Save, ArrowLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { fetchUserProfile, updateUserProfile, UserProfile } from "@/services/profileService";
+import { supabase } from "@/integrations/supabase/client";
 
-const profileFormSchema = z.object({
-  full_name: z.string().min(2, { message: "Full name must be at least 2 characters." }),
-  bio: z.string().optional(),
+const formSchema = z.object({
+  full_name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
   institution: z.string().optional(),
   country: z.string().optional(),
+  bio: z.string().max(300, {
+    message: "Bio cannot be longer than 300 characters.",
+  }).optional(),
 });
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function EditProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       full_name: "",
-      bio: "",
       institution: "",
       country: "",
+      bio: "",
     },
   });
 
@@ -49,90 +65,77 @@ export default function EditProfilePage() {
       return;
     }
 
-    const loadProfile = async () => {
+    const loadUserProfile = async () => {
       setIsLoading(true);
-      const profileData = await fetchUserProfile(user.id);
-      setProfile(profileData);
-      
-      if (profileData) {
-        form.reset({
-          full_name: profileData.full_name || "",
-          bio: profileData.bio || "",
-          institution: profileData.institution || "",
-          country: profileData.country || "",
+      try {
+        const profile = await fetchUserProfile(user.id);
+        if (profile) {
+          form.reset({
+            full_name: profile.full_name || "",
+            institution: profile.institution || "",
+            country: profile.country || "",
+            bio: profile.bio || "",
+          });
+          setAvatarUrl(profile.avatar_url);
+        }
+      } catch (error) {
+        console.error("Error loading user profile:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
         });
-        setAvatarUrl(profileData.avatar_url);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
-    loadProfile();
-  }, [user, navigate, form]);
-
-  const onSubmit = async (data: ProfileFormValues) => {
-    if (!user) return;
-    
-    setIsLoading(true);
-    
-    try {
-      await updateUserProfile(user.id, {
-        ...data,
-        avatar_url: avatarUrl,
-      });
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
-      
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    loadUserProfile();
+  }, [user, navigate, form, toast]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || !event.target.files.length) return;
-    if (!user) return;
-    
+    if (!user || !event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
     const file = event.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
     setUploading(true);
-    
+
     try {
       // Upload the file to Supabase storage
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from("avatars")
         .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
       // Get the public URL
-      const { data } = await supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-        
-      setAvatarUrl(data.publicUrl);
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
       
-      toast({
-        title: "Avatar uploaded",
-        description: "Your avatar has been successfully uploaded.",
-      });
+      if (data) {
+        setAvatarUrl(data.publicUrl);
+        
+        // Update the profile with the new avatar URL
+        await updateUserProfile(user.id, {
+          avatar_url: data.publicUrl,
+        });
+
+        toast({
+          title: "Avatar updated",
+          description: "Your profile picture has been updated successfully",
+        });
+      }
     } catch (error) {
       console.error("Error uploading avatar:", error);
       toast({
-        title: "Error",
-        description: "Failed to upload avatar. Please try again.",
+        title: "Upload failed",
+        description: "There was an error uploading your avatar",
         variant: "destructive",
       });
     } finally {
@@ -140,151 +143,161 @@ export default function EditProfilePage() {
     }
   };
 
-  if (isLoading && !profile) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      await updateUserProfile(user.id, {
+        ...values,
+        avatar_url: avatarUrl,
+      });
+
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+
+      navigate("/profile");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Update failed",
+        description: "There was an error updating your profile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center mb-6">
+      <div className="max-w-3xl mx-auto">
         <Button 
-          variant="ghost" 
-          onClick={() => navigate("/profile")} 
-          className="mr-2"
+          variant="outline" 
+          className="mb-4" 
+          onClick={() => navigate("/profile")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Profile
         </Button>
-        <h1 className="text-2xl font-bold">Edit Profile</h1>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="flex flex-col items-center space-y-4">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src={avatarUrl || undefined} alt={profile?.full_name || 'User avatar'} />
-                <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
-                  {profile?.full_name?.split(' ').map(n => n[0]).join('') || '?'}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Edit Profile</CardTitle>
+            <CardDescription>
+              Update your profile information
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center mb-6">
+              <Avatar className="h-24 w-24 mb-4">
+                <AvatarImage src={avatarUrl || undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                  <User />
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex flex-col items-center">
-                <label 
-                  htmlFor="avatar-upload" 
-                  className="cursor-pointer bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors"
-                >
-                  {uploading ? (
-                    <span className="flex items-center">
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Uploading...
-                    </span>
-                  ) : (
-                    "Change Avatar"
-                  )}
-                </label>
-                <input
-                  id="avatar-upload"
+              <div className="flex items-center">
+                <Input
+                  id="avatar"
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarUpload}
                   className="hidden"
-                  disabled={uploading}
                 />
+                <Button 
+                  variant="outline" 
+                  onClick={() => document.getElementById("avatar")?.click()}
+                  disabled={uploading}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading ? "Uploading..." : "Upload Avatar"}
+                </Button>
               </div>
             </div>
-            
-            <div className="flex-1">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="full_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your full name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bio</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Tell us about yourself" 
-                            className="resize-none h-24"
-                            {...field} 
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="institution"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Institution</FormLabel>
-                          <FormControl>
-                            <Input placeholder="University or company" {...field} value={field.value || ""} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="country"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Country</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your country" {...field} value={field.value || ""} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save Changes"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="full_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="institution"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Institution</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="University or Organization" 
+                          {...field} 
+                          value={field.value || ""} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Your country" 
+                          {...field} 
+                          value={field.value || ""} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="bio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bio</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Tell us about yourself..." 
+                          className="resize-none h-20" 
+                          {...field} 
+                          value={field.value || ""} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

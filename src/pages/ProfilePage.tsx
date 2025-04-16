@@ -2,13 +2,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Settings } from "lucide-react";
+import { Settings, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { AchievementsCard } from "@/components/profile/AchievementsCard";
 import { ActivityGraph } from "@/components/profile/ActivityGraph";
+import { ActivityCalendar } from "@/components/profile/ActivityCalendar";
 import { FavoriteTagsCard } from "@/components/profile/FavoriteTagsCard";
+import { TagStatsChart } from "@/components/profile/TagStatsChart";
+import { CourseRecommendations } from "@/components/profile/CourseRecommendations";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import {
   fetchUserProfile,
   fetchUserAchievements,
@@ -20,6 +26,15 @@ import {
   type ActivityLog,
 } from "@/services/profileService";
 
+import {
+  getRecommendedCourses,
+  getUserTagStats,
+  getAIRecommendations,
+  type Course,
+  type TagStats,
+  type AIRecommendation,
+} from "@/services/recommendationService";
+
 export default function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -27,7 +42,11 @@ export default function ProfilePage() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [favoriteTags, setFavoriteTags] = useState<FavoriteTag[]>([]);
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
+  const [tagStats, setTagStats] = useState<TagStats[]>([]);
+  const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
+  const [aiRecommendations, setAIRecommendations] = useState<AIRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (!user) {
@@ -38,17 +57,31 @@ export default function ProfilePage() {
     const loadProfileData = async () => {
       setLoading(true);
       try {
-        const [profileData, achievementsData, tagsData, activityData] = await Promise.all([
+        const [
+          profileData, 
+          achievementsData, 
+          tagsData, 
+          activityData,
+          tagStatsData,
+          coursesData,
+          recommendationsData
+        ] = await Promise.all([
           fetchUserProfile(user.id),
           fetchUserAchievements(user.id),
           fetchFavoriteTags(user.id),
           fetchActivityLog(user.id),
+          getUserTagStats(user.id),
+          getRecommendedCourses(user.id),
+          getAIRecommendations(user.id)
         ]);
 
         setProfile(profileData);
         setAchievements(achievementsData);
         setFavoriteTags(tagsData);
         setActivityLog(activityData);
+        setTagStats(tagStatsData);
+        setRecommendedCourses(coursesData);
+        setAIRecommendations(recommendationsData);
       } catch (error) {
         console.error("Error loading profile data:", error);
       } finally {
@@ -118,33 +151,65 @@ export default function ProfilePage() {
           </Button>
         </div>
       </div>
+      
+      {/* AI Recommendations Alert */}
+      {aiRecommendations.length > 0 && (
+        <Alert className="mb-8 border-primary/20 bg-primary/10">
+          <Lightbulb className="h-4 w-4 text-primary" />
+          <AlertTitle>AI Recommendation</AlertTitle>
+          <AlertDescription>
+            {aiRecommendations[0].description}
+          </AlertDescription>
+        </Alert>
+      )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Stats Cards */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold">Problems Solved</h3>
-            <div className="mt-2 space-y-2">
-              <div className="text-3xl font-bold text-primary">
-                {activityLog.reduce((sum, day) => sum + day.problems_solved, 0)}
-              </div>
-              <p className="text-sm text-gray-600">Total problems completed</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        <TabsList className="grid grid-cols-3 w-full md:w-[400px]">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="learning">Learning</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Stats Cards */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold">Problems Solved</h3>
+                <div className="mt-2 space-y-2">
+                  <div className="text-3xl font-bold text-primary">
+                    {activityLog.reduce((sum, day) => sum + day.problems_solved, 0)}
+                  </div>
+                  <p className="text-sm text-gray-600">Total problems completed</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Activity and Achievements */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <ActivityGraph activityLog={activityLog} />
-        <AchievementsCard achievements={achievements} />
-      </div>
+          {/* Activity and Achievements */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <ActivityGraph activityLog={activityLog} />
+            <AchievementsCard achievements={achievements} />
+          </div>
 
-      {/* Tags */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <FavoriteTagsCard tags={favoriteTags} />
-      </div>
+          {/* Tags */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FavoriteTagsCard tags={favoriteTags} />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="activity" className="space-y-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <ActivityCalendar activityLog={activityLog} />
+            <TagStatsChart tagStats={tagStats} />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="learning" className="space-y-6 mt-6">
+          <CourseRecommendations courses={recommendedCourses} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
