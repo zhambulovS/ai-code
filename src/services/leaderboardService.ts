@@ -57,7 +57,7 @@ export const fetchLeaderboard = async (
       if (!problemsSolved[submission.user_id]) {
         problemsSolved[submission.user_id] = new Set();
       }
-      problemsSolved[submission.user_id].add(submission.problem_id);
+      problemsSolved[submission.user_id].add(submission.problem_id.toString());
     });
     
     // Combine the data

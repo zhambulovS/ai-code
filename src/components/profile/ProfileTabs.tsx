@@ -1,0 +1,70 @@
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ActivityLog, Achievement, FavoriteTag } from "@/services/profileService";
+import { Course, TagStats, AIRecommendation } from "@/services/recommendationService";
+import { StatsCard } from "./StatsCard";
+import { ActivityGraph } from "./ActivityGraph";
+import { AchievementsCard } from "./AchievementsCard";
+import { FavoriteTagsCard } from "./FavoriteTagsCard";
+import { ActivityCalendar } from "./ActivityCalendar";
+import { TagStatsChart } from "./TagStatsChart";
+import { CourseRecommendations } from "./CourseRecommendations";
+
+interface ProfileTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  activityLog: ActivityLog[];
+  achievements: Achievement[];
+  favoriteTags: FavoriteTag[];
+  tagStats: TagStats[];
+  recommendedCourses: Course[];
+}
+
+export function ProfileTabs({
+  activeTab,
+  setActiveTab,
+  activityLog,
+  achievements,
+  favoriteTags,
+  tagStats,
+  recommendedCourses,
+}: ProfileTabsProps) {
+  return (
+    <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+      <TabsList className="grid grid-cols-3 w-full md:w-[400px]">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="activity">Activity</TabsTrigger>
+        <TabsTrigger value="learning">Learning</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="overview" className="space-y-6 mt-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatsCard activityLog={activityLog} />
+        </div>
+
+        {/* Activity and Achievements */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ActivityGraph activityLog={activityLog} />
+          <AchievementsCard achievements={achievements} />
+        </div>
+
+        {/* Tags */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FavoriteTagsCard tags={favoriteTags} />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="activity" className="space-y-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ActivityCalendar activityLog={activityLog} />
+          <TagStatsChart tagStats={tagStats} />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="learning" className="space-y-6 mt-6">
+        <CourseRecommendations courses={recommendedCourses} />
+      </TabsContent>
+    </Tabs>
+  );
+}

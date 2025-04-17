@@ -12,6 +12,7 @@ import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import { Toaster } from "@/components/ui/toaster";
+import { QueryProvider } from "./providers/QueryProvider";
 
 // ScrollToTop component to ensure pages start at the top
 function ScrollToTop() {
@@ -26,23 +27,25 @@ function ScrollToTop() {
 
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="problems" element={<ProblemsPage />} />
-          <Route path="problems/:id" element={<ProblemDetailPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="edit-profile" element={<EditProfilePage />} />
-          <Route path="leaderboard" element={<LeaderboardPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-      <Toaster />
-    </Router>
+    <QueryProvider>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="problems" element={<ProblemsPage />} />
+            <Route path="problems/:id" element={<ProblemDetailPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="edit-profile" element={<EditProfilePage />} />
+            <Route path="leaderboard" element={<LeaderboardPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+        <Toaster />
+      </Router>
+    </QueryProvider>
   );
 }
 

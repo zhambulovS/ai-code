@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { ActivityLog } from "@/services/profileService";
 
 interface ActivityCalendarProps {
@@ -38,7 +38,6 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
         <div className="flex flex-col space-y-4">
           <Calendar
             mode="single"
-            selected={new Date()}
             onMonthChange={setCurrentMonth}
             className="rounded-md border"
             modifiers={{
@@ -60,8 +59,8 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
                   <div
                     {...props}
                     className={`h-9 w-9 p-0 font-normal flex items-center justify-center rounded-md ${
-                      props.selected ? 'ring-2 ring-primary' : ''
-                    } ${getActivityClass(date)}`}
+                      getActivityClass(date)
+                    }`}
                     title={`${problemsSolved} problems solved on ${format(date, 'PP')}`}
                   >
                     {date.getDate()}
