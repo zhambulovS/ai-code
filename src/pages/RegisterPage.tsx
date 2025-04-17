@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +25,7 @@ const RegisterPage = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -51,27 +51,22 @@ const RegisterPage = () => {
     
     try {
       setIsLoading(true);
-      // Sign up with Supabase
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: userRole
-          }
-        }
+      // Sign up with auth hook
+      const result = await signup(email, password, {
+        full_name: fullName,
+        role: userRole
       });
 
-      if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       toast({
         title: "Success",
         description: "Your account has been created successfully",
       });
       
-      // Redirect to problems page
-      navigate("/problems");
+      // Navigation will be handled by the auth hook
     } catch (error: any) {
       toast({
         title: "Error",

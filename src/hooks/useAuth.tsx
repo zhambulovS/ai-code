@@ -30,6 +30,7 @@ export const useAuth = () => {
             title: "Signed in",
             description: "Welcome back!",
           });
+          // Navigate to profile page on successful sign in
           navigate('/profile');
         }
       }
@@ -66,6 +67,24 @@ export const useAuth = () => {
     }
   };
 
+  const signup = async (email: string, password: string, userData: any) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData
+        }
+      });
+      
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error: any) {
+      console.error("Signup error:", error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
   const logout = async () => {
     try {
       await supabase.auth.signOut();
@@ -79,19 +98,24 @@ export const useAuth = () => {
   const getUserProfile = async () => {
     if (!user) return null;
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
       
-    if (error) {
-      console.error('Error fetching user profile:', error);
+      return data;
+    } catch (error) {
+      console.error('Error in getUserProfile:', error);
       return null;
     }
-    
-    return data;
   };
 
-  return { user, session, loading, login, logout, getUserProfile };
+  return { user, session, loading, login, signup, logout, getUserProfile };
 };

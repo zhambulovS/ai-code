@@ -14,9 +14,14 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
   
   // Transform activity data for the calendar
   const activityMap = new Map<string, number>();
-  activityLog.forEach(log => {
-    activityMap.set(log.date, log.problems_solved);
-  });
+  
+  if (Array.isArray(activityLog)) {
+    activityLog.forEach(log => {
+      if (log && log.date) {
+        activityMap.set(log.date, log.problems_solved);
+      }
+    });
+  }
 
   // Function to determine the CSS class based on activity level
   const getActivityClass = (date: Date): string => {

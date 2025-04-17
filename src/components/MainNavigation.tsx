@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
@@ -16,12 +16,14 @@ import { useAuth } from "@/hooks/useAuth";
 
 const MainNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    const result = await logout();
+    if (result.success) {
+      navigate('/login');
+    }
   };
 
   return (
@@ -47,7 +49,9 @@ const MainNavigation = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
+            {loading ? (
+              <div className="h-10 w-10 animate-pulse bg-gray-200 rounded-full"></div>
+            ) : user ? (
               <>
                 <Link to="/profile">
                   <Button variant="ghost" className="text-gray-700 hover:text-primary">
@@ -112,7 +116,11 @@ const MainNavigation = () => {
                 <span>Leaderboard</span>
               </div>
             </Link>
-            {user ? (
+            {loading ? (
+              <div className="px-3 py-2">
+                <div className="h-8 w-24 animate-pulse bg-gray-200 rounded"></div>
+              </div>
+            ) : user ? (
               <>
                 <Link 
                   to="/profile" 
