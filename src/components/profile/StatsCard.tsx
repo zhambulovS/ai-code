@@ -7,7 +7,9 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ activityLog }: StatsCardProps) {
-  const totalProblemsSolved = activityLog.reduce((sum, day) => sum + day.problems_solved, 0);
+  const totalProblemsSolved = Array.isArray(activityLog) 
+    ? activityLog.reduce((sum, day) => sum + day.problems_solved, 0)
+    : 0;
 
   return (
     <Card>

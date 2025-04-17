@@ -30,6 +30,7 @@ export const useAuth = () => {
             title: "Signed in",
             description: "Welcome back!",
           });
+          navigate('/profile');
         }
       }
     );
@@ -39,6 +40,10 @@ export const useAuth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      if (session) {
+        console.log("Active session found", session.user.id);
+      }
     });
 
     return () => {
@@ -46,8 +51,29 @@ export const useAuth = () => {
     };
   }, [navigate]);
 
+  const login = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error: any) {
+      console.error("Login error:", error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      return { success: true };
+    } catch (error: any) {
+      console.error("Logout error:", error.message);
+      return { success: false, error: error.message };
+    }
   };
 
   const getUserProfile = async () => {
@@ -67,5 +93,5 @@ export const useAuth = () => {
     return data;
   };
 
-  return { user, session, loading, logout, getUserProfile };
+  return { user, session, loading, login, logout, getUserProfile };
 };

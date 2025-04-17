@@ -8,7 +8,7 @@ interface AIRecommendationAlertProps {
 }
 
 export function AIRecommendationAlert({ recommendations }: AIRecommendationAlertProps) {
-  if (recommendations.length === 0) {
+  if (!recommendations || recommendations.length === 0) {
     return null;
   }
 
