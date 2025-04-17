@@ -1,5 +1,5 @@
 
-import { Check, X, TimerIcon } from "lucide-react";
+import { Check, X, TimerIcon, HardDrive } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { TestResult } from "@/services/codeExecutionService";
 
@@ -34,9 +34,17 @@ export function TestResults({ results }: TestResultsProps) {
                 <div><span className="font-medium">Вход:</span> {result.testCase.input.replace(/\n/g, ', ')}</div>
                 <div><span className="font-medium">Ваш вывод:</span> {result.output}</div>
                 <div><span className="font-medium">Ожидаемый вывод:</span> {result.expected}</div>
-                <div className="flex items-center mt-1">
-                  <TimerIcon className="h-4 w-4 mr-1 text-gray-500" />
-                  <span className="text-gray-600">Время выполнения: {result.executionTime} мс</span>
+                <div className="flex flex-wrap gap-x-4 mt-2">
+                  <div className="flex items-center">
+                    <TimerIcon className="h-4 w-4 mr-1 text-gray-500" />
+                    <span className="text-gray-600">Время: {result.executionTime} мс</span>
+                  </div>
+                  {result.memoryUsed !== undefined && (
+                    <div className="flex items-center">
+                      <HardDrive className="h-4 w-4 mr-1 text-gray-500" />
+                      <span className="text-gray-600">Память: {(result.memoryUsed / 1024).toFixed(2)} МБ</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

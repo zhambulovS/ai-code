@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -91,7 +90,13 @@ const ProblemDetailPage = () => {
     setTestResults([]);
     
     try {
-      const results = await runTestCases(code, language, testCases);
+      const results = await runTestCases(
+        code, 
+        language, 
+        testCases,
+        user ? problemId : undefined,
+        user ? user.id : undefined
+      );
       setTestResults(results);
       
       const allPassed = results.every(r => r.passed);
@@ -100,7 +105,7 @@ const ProblemDetailPage = () => {
         description: allPassed 
           ? "Ваш код прошел все тестовые примеры."
           : "Проверьте результаты выполнения тестов.",
-        variant: "default"
+        variant: allPassed ? "default" : "destructive"
       });
     } catch (error) {
       toast({
@@ -120,13 +125,21 @@ const ProblemDetailPage = () => {
         description: "Чтобы отправить решение, необходимо войти в систему.",
         variant: "destructive"
       });
+      navigate('/login');
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      const results = await runTestCases(code, language, testCases || []);
+      const results = await runTestCases(
+        code, 
+        language, 
+        testCases || [],
+        problemId,
+        user.id
+      );
+      
       const allPassed = results.every(r => r.passed);
       
       await submitMutation.mutateAsync({
@@ -136,7 +149,7 @@ const ProblemDetailPage = () => {
         language,
         status: allPassed ? "accepted" : "wrong_answer",
         execution_time: Math.max(...results.map(r => r.executionTime), 0),
-        memory_used: Math.floor(Math.random() * 10000)
+        memory_used: Math.max(...(results.map(r => r.memoryUsed || 0)), 0)
       });
       
       toast({
@@ -148,6 +161,10 @@ const ProblemDetailPage = () => {
       });
       
       setTestResults(results);
+      
+      if (allPassed) {
+        setCurrentTab("submissions");
+      }
     } catch (error) {
       toast({
         title: "Ошибка отправки",

@@ -1,7 +1,5 @@
-// Этот сервис симулирует выполнение кода и проверку решений
-// В реальном приложении здесь бы была интеграция с бэкендом для запуска кода
 
-import { TestCase } from "./problemsService";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ExecutionResult {
   output: string;
@@ -12,11 +10,12 @@ export interface ExecutionResult {
 }
 
 export interface TestResult {
-  testCase: TestCase;
+  testCase: any;
   output: string;
   expected: string;
   passed: boolean;
   executionTime: number;
+  memoryUsed?: number;
 }
 
 export const executeCode = async (
@@ -24,7 +23,7 @@ export const executeCode = async (
   language: string,
   input: string
 ): Promise<ExecutionResult> => {
-  // Симуляция выполнения кода
+  // Simulate local execution for development/testing
   return new Promise((resolve) => {
     // Эмуляция времени выполнения
     const executionDelay = Math.random() * 1000 + 500;
@@ -94,8 +93,52 @@ export const executeCode = async (
 export const runTestCases = async (
   code: string,
   language: string,
-  testCases: TestCase[]
+  testCases: any[],
+  problemId?: number,
+  userId?: string
 ): Promise<TestResult[]> => {
+  if (problemId && userId) {
+    // Use the Judge server through Edge Function
+    try {
+      const { data, error } = await supabase.functions.invoke('code-judge', {
+        body: {
+          code,
+          language,
+          problemId,
+          userId,
+          timeLimit: 2000, // 2 seconds
+          memoryLimit: 256000 // 256 MB
+        }
+      });
+      
+      if (error) {
+        console.error("Error invoking judge function:", error);
+        throw error;
+      }
+      
+      if (data.error) {
+        console.error("Judge function returned error:", data.error);
+        throw new Error(data.error);
+      }
+      
+      return data.testResults.map((result: any) => ({
+        testCase: testCases.find(tc => tc.id === result.id) || {
+          input: result.input,
+          expected_output: result.expected
+        },
+        output: result.output,
+        expected: result.expected,
+        passed: result.passed,
+        executionTime: result.executionTime,
+        memoryUsed: result.memoryUsed
+      }));
+    } catch (error) {
+      console.error("Error running test cases through judge:", error);
+      // Fall back to local execution if the edge function fails
+    }
+  }
+  
+  // Local execution as a fallback
   const results: TestResult[] = [];
   
   for (const testCase of testCases) {
@@ -110,7 +153,8 @@ export const runTestCases = async (
       output: result.output,
       expected: testCase.expected_output,
       passed: normalizedOutput === normalizedExpected,
-      executionTime: result.executionTime
+      executionTime: result.executionTime,
+      memoryUsed: result.memoryUsed
     });
   }
   
