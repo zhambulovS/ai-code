@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, subDays, isEqual, isSameMonth, isSameDay } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { ActivityLog } from "@/services/profileService";
 
 interface ActivityCalendarProps {
@@ -29,25 +29,6 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
     return "bg-green-500";
   };
 
-  // Custom day renderer for the calendar
-  const renderDay = (day: Date, selectedDay: Date, props: Record<string, any>) => {
-    const isSelected = isSameDay(day, selectedDay);
-    const dateStr = format(day, 'yyyy-MM-dd');
-    const problemsSolved = activityMap.get(dateStr) || 0;
-    
-    return (
-      <div
-        {...props}
-        className={`h-9 w-9 p-0 font-normal flex items-center justify-center rounded-md ${
-          isSelected ? 'ring-2 ring-primary' : ''
-        } ${getActivityClass(day)}`}
-        title={`${problemsSolved} problems solved on ${format(day, 'PP')}`}
-      >
-        {day.getDate()}
-      </div>
-    );
-  };
-
   return (
     <Card className="col-span-1 md:col-span-2">
       <CardHeader>
@@ -60,8 +41,33 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
             selected={new Date()}
             onMonthChange={setCurrentMonth}
             className="rounded-md border"
+            modifiers={{
+              booked: (date) => {
+                const dateStr = format(date, 'yyyy-MM-dd');
+                return activityMap.has(dateStr) && activityMap.get(dateStr)! > 0;
+              }
+            }}
+            modifiersStyles={{
+              booked: { backgroundColor: 'var(--green-500)' }
+            }}
             components={{
-              Day: renderDay
+              Day: (props) => {
+                const date = props.date;
+                const dateStr = format(date, 'yyyy-MM-dd');
+                const problemsSolved = activityMap.get(dateStr) || 0;
+                
+                return (
+                  <div
+                    {...props}
+                    className={`h-9 w-9 p-0 font-normal flex items-center justify-center rounded-md ${
+                      props.selected ? 'ring-2 ring-primary' : ''
+                    } ${getActivityClass(date)}`}
+                    title={`${problemsSolved} problems solved on ${format(date, 'PP')}`}
+                  >
+                    {date.getDate()}
+                  </div>
+                );
+              }
             }}
           />
           <div className="flex justify-center space-x-2 text-sm">

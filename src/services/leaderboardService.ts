@@ -52,7 +52,7 @@ export const fetchLeaderboard = async (
     if (subError) throw subError;
     
     // Count unique problems solved per user
-    const problemsSolved: Record<string, number> = {};
+    const problemsSolved: Record<string, Set<string>> = {};
     submissions?.forEach(submission => {
       if (!problemsSolved[submission.user_id]) {
         problemsSolved[submission.user_id] = new Set();
