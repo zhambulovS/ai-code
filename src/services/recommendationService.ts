@@ -1,11 +1,10 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Course {
   id: string;
   title: string;
   description: string;
-  level: string;
+  difficulty: string;
   tags: string[];
   rating: number;
 }
@@ -33,7 +32,7 @@ export const getRecommendedCourses = async (userId: string): Promise<Course[]> =
       id: "1",
       title: "Dynamic Programming Masterclass",
       description: "Learn advanced techniques for solving DP problems efficiently",
-      level: "Advanced",
+      difficulty: "Advanced",
       tags: ["Dynamic Programming", "Algorithms"],
       rating: 4.8
     },
@@ -41,7 +40,7 @@ export const getRecommendedCourses = async (userId: string): Promise<Course[]> =
       id: "2",
       title: "Graph Theory Fundamentals",
       description: "Essential concepts in graph theory with practical applications",
-      level: "Intermediate",
+      difficulty: "Intermediate",
       tags: ["Graphs", "BFS", "DFS"],
       rating: 4.6
     },
@@ -49,7 +48,7 @@ export const getRecommendedCourses = async (userId: string): Promise<Course[]> =
       id: "3",
       title: "Data Structures Deep Dive",
       description: "In-depth exploration of advanced data structures",
-      level: "Intermediate",
+      difficulty: "Intermediate",
       tags: ["Data Structures", "Trees", "Heaps"],
       rating: 4.7
     }
