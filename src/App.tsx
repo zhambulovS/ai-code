@@ -13,6 +13,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryProvider } from "./providers/QueryProvider";
+import AuthProvider from "./hooks/useAuth";
 
 // ScrollToTop component to ensure pages start at the top
 function ScrollToTop() {
@@ -29,21 +30,23 @@ function App() {
   return (
     <QueryProvider>
       <Router>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<HomePage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="problems" element={<ProblemsPage />} />
-            <Route path="problems/:id" element={<ProblemDetailPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="edit-profile" element={<EditProfilePage />} />
-            <Route path="leaderboard" element={<LeaderboardPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-        <Toaster />
+        <AuthProvider>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<HomePage />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
+              <Route path="problems" element={<ProblemsPage />} />
+              <Route path="problems/:id" element={<ProblemDetailPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="edit-profile" element={<EditProfilePage />} />
+              <Route path="leaderboard" element={<LeaderboardPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+          <Toaster />
+        </AuthProvider>
       </Router>
     </QueryProvider>
   );

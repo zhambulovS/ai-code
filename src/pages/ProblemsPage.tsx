@@ -1,238 +1,289 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { 
-  Search, 
-  Filter, 
-  ChevronDown, 
-  Check,
-  CheckCircle2, 
-  Clock,
-  Tag,
-  Loader2
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProblems } from "@/services/problemsService";
+import { Check, Search, Filter, ArrowUpDown } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { SeedProblemsButton } from "@/components/problem-detail/SeedProblemsButton";
+import { useToast } from "@/hooks/use-toast";
+import { TableSkeleton } from "@/components/SkeletonUI";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/useAuth";
-import { useProblems } from "@/services/problemsService";
+import { ensureProblemsExist } from "@/services/seedProblemsService";
 
-const difficultyColors = {
-  Easy: "text-green-500",
-  Medium: "text-yellow-500",
-  Hard: "text-red-500"
-};
-
-const ProblemsPage = () => {
-  const { user } = useAuth();
-  const { data: problems, isLoading } = useProblems();
-  
+export default function ProblemsPage() {
+  const { data: problems, isLoading, error, refetch } = useProblems();
+  const [filteredProblems, setFilteredProblems] = useState(problems || []);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showSolved, setShowSolved] = useState<boolean>(true);
-  const [showUnsolved, setShowUnsolved] = useState<boolean>(true);
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [sortField, setSortField] = useState("id");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Получаем все уникальные теги из задач
-  const allTags = problems 
-    ? Array.from(new Set(problems.flatMap(problem => problem.tags))).sort()
-    : [];
+  useEffect(() => {
+    const checkProblems = async () => {
+      try {
+        const hasAddedProblems = await ensureProblemsExist();
+        if (hasAddedProblems) {
+          toast({
+            title: "Демонстрационные задачи добавлены",
+            description: "В базу данных были автоматически добавлены демонстрационные задачи.",
+          });
+          // Обновляем список задач после добавления
+          refetch();
+        }
+      } catch (error) {
+        console.error("Error checking/adding problems:", error);
+      }
+    };
 
-  // Фильтруем задачи
-  const filteredProblems = problems?.filter(problem => {
-    // Фильтр по поисковому запросу
-    const matchesSearch = problem.title.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Фильтр по сложности
-    const matchesDifficulty = selectedDifficulty.length === 0 || 
-      selectedDifficulty.includes(problem.difficulty);
-    
-    // Фильтр по тегам
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.some(tag => problem.tags.includes(tag));
-    
-    // В реальном приложении здесь был бы фильтр по статусу "решено/не решено"
-    // Для демонстрации просто всегда возвращаем true
-    const matchesSolved = true;
-    
-    return matchesSearch && matchesDifficulty && matchesTags && matchesSolved;
-  }) || [];
+    checkProblems();
+  }, [refetch, toast]);
+
+  useEffect(() => {
+    if (problems) {
+      let filtered = [...problems];
+
+      // Apply difficulty filter
+      if (difficultyFilter !== "all") {
+        filtered = filtered.filter(problem => problem.difficulty === difficultyFilter);
+      }
+
+      // Apply search filter
+      if (searchTerm.trim() !== "") {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(
+          problem =>
+            problem.title.toLowerCase().includes(term) ||
+            problem.tags.some(tag => tag.toLowerCase().includes(term))
+        );
+      }
+
+      // Apply sort
+      filtered.sort((a, b) => {
+        let valueA, valueB;
+
+        switch (sortField) {
+          case "title":
+            valueA = a.title;
+            valueB = b.title;
+            break;
+          case "difficulty":
+            const difficultyOrder = { easy: 1, medium: 2, hard: 3 };
+            valueA = difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 0;
+            valueB = difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 0;
+            break;
+          case "acceptance_rate":
+            valueA = a.acceptance_rate || 0;
+            valueB = b.acceptance_rate || 0;
+            break;
+          default: // id is default
+            valueA = a.id;
+            valueB = b.id;
+        }
+
+        if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+        if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+
+      setFilteredProblems(filtered);
+    }
+  }, [problems, searchTerm, difficultyFilter, sortField, sortOrder]);
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "easy":
+        return "bg-green-100 text-green-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "hard":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getDifficultyLabel = (difficulty: string) => {
+    switch (difficulty) {
+      case "easy":
+        return "Легкий";
+      case "medium":
+        return "Средний";
+      case "hard":
+        return "Сложный";
+      default:
+        return difficulty;
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-center text-red-600">Ошибка загрузки задач</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center">Произошла ошибка при загрузке задач. Пожалуйста, попробуйте позже.</p>
+            <div className="flex justify-center mt-4">
+              <Button onClick={() => refetch()}>Повторить попытку</Button>
+            </div>
+            <div className="flex justify-center mt-4">
+              <SeedProblemsButton />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col space-y-6">
-        <h1 className="text-3xl font-bold">Каталог задач</h1>
-        
-        {/* Поиск и фильтры */}
-        <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 mb-6">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <Input
-              placeholder="Поиск задач..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Задачи по программированию</CardTitle>
+            <SeedProblemsButton />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Поиск по названию или тегам..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="sm:w-40">
+              <Select
+                value={difficultyFilter}
+                onValueChange={setDifficultyFilter}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Сложность" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все</SelectItem>
+                  <SelectItem value="easy">Легкий</SelectItem>
+                  <SelectItem value="medium">Средний</SelectItem>
+                  <SelectItem value="hard">Сложный</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="flex space-x-2">
-            {/* Фильтр по сложности */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Сложность
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {["Easy", "Medium", "Hard"].map(difficulty => (
-                  <DropdownMenuCheckboxItem
-                    key={difficulty}
-                    checked={selectedDifficulty.includes(difficulty)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedDifficulty([...selectedDifficulty, difficulty]);
-                      } else {
-                        setSelectedDifficulty(selectedDifficulty.filter(d => d !== difficulty));
-                      }
-                    }}
-                    className={difficultyColors[difficulty as keyof typeof difficultyColors]}
-                  >
-                    {difficulty}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Фильтр по тегам */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center">
-                  <Tag className="mr-2 h-4 w-4" />
-                  Теги
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 max-h-80 overflow-y-auto">
-                {allTags.map(tag => (
-                  <DropdownMenuCheckboxItem
-                    key={tag}
-                    checked={selectedTags.includes(tag)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedTags([...selectedTags, tag]);
-                      } else {
-                        setSelectedTags(selectedTags.filter(t => t !== tag));
-                      }
-                    }}
-                  >
-                    {tag}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Фильтр по статусу решения (если пользователь авторизован) */}
-            {user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center">
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Статус
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuCheckboxItem
-                    checked={showSolved}
-                    onCheckedChange={(checked) => setShowSolved(!!checked)}
-                  >
-                    Решенные
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={showUnsolved}
-                    onCheckedChange={(checked) => setShowUnsolved(!!checked)}
-                  >
-                    Нерешенные
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-        
-        {/* Список задач */}
-        {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredProblems.length > 0 ? (
-              filteredProblems.map(problem => (
-                <Link to={`/problems/${problem.id}`} key={problem.id}>
-                  <Card className="hover:border-primary hover:shadow-md transition-all">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center">
-                            <h3 className="font-semibold">{problem.title}</h3>
-                          </div>
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {problem.description.replace(/<[^>]*>/g, '')}
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {problem.tags.map(tag => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end space-y-2">
-                          <span className={difficultyColors[problem.difficulty as keyof typeof difficultyColors]}>
-                            {problem.difficulty}
-                          </span>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span>{problem.acceptance_rate}%</span>
-                          </div>
-                        </div>
+          {isLoading ? (
+            <TableSkeleton rows={10} columns={4} />
+          ) : filteredProblems.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-gray-500">
+                {problems?.length === 0
+                  ? "В базе данных нет задач. Используйте кнопку выше, чтобы добавить демонстрационные задачи."
+                  : "Нет задач, соответствующих заданным фильтрам."}
+              </p>
+            </div>
+          ) : (
+            <div className="border rounded-md overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16 text-center">№</TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => handleSort("title")}>
+                      <div className="flex items-center">
+                        Название
+                        {sortField === "title" && (
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Задачи, соответствующие выбранным фильтрам, не найдены.</p>
-                <Button 
-                  variant="link" 
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSelectedDifficulty([]);
-                    setSelectedTags([]);
-                    setShowSolved(true);
-                    setShowUnsolved(true);
-                  }}
-                >
-                  Сбросить все фильтры
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => handleSort("difficulty")}>
+                      <div className="flex items-center">
+                        Сложность
+                        {sortField === "difficulty" && (
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead>Теги</TableHead>
+                    <TableHead className="cursor-pointer text-right" onClick={() => handleSort("acceptance_rate")}>
+                      <div className="flex items-center justify-end">
+                        Процент решения
+                        {sortField === "acceptance_rate" && (
+                          <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
+                      </div>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProblems.map((problem) => (
+                    <TableRow
+                      key={problem.id}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => navigate(`/problems/${problem.id}`)}
+                    >
+                      <TableCell className="font-medium text-center">{problem.id}</TableCell>
+                      <TableCell>{problem.title}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(
+                            problem.difficulty
+                          )}`}
+                        >
+                          {getDifficultyLabel(problem.difficulty)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {problem.tags.map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {problem.acceptance_rate ? `${problem.acceptance_rate.toFixed(1)}%` : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default ProblemsPage;
+}

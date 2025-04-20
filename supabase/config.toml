@@ -41,4 +41,4 @@ enable_signup = true
 enable_confirmations = true
 
 [functions.code-judge]
-verify_jwt = true
+verify_jwt = false

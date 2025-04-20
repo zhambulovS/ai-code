@@ -27,17 +27,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { fetchUserProfile, updateUserProfile, UserProfile } from "@/services/profileService";
+import { fetchUserProfile, updateUserProfile } from "@/services/profileService";
 import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   full_name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "Имя должно содержать минимум 2 символа.",
   }),
   institution: z.string().optional(),
   country: z.string().optional(),
   bio: z.string().max(300, {
-    message: "Bio cannot be longer than 300 characters.",
+    message: "Биография не может быть длиннее 300 символов.",
   }).optional(),
 });
 
@@ -61,6 +62,11 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     if (!user) {
+      toast({
+        title: "Требуется вход в систему",
+        description: "Для редактирования профиля необходимо войти в систему.",
+        variant: "destructive",
+      });
       navigate("/login");
       return;
     }
@@ -81,8 +87,8 @@ export default function EditProfilePage() {
       } catch (error) {
         console.error("Error loading user profile:", error);
         toast({
-          title: "Error",
-          description: "Failed to load profile data",
+          title: "Ошибка",
+          description: "Не удалось загрузить данные профиля.",
           variant: "destructive",
         });
       } finally {
@@ -106,7 +112,22 @@ export default function EditProfilePage() {
     setUploading(true);
 
     try {
-      // Upload the file to Supabase storage
+      // Проверяем, существует ли бакет, и создаем его, если нет
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) throw bucketsError;
+      
+      const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
+      
+      if (!avatarBucketExists) {
+        const { error: createBucketError } = await supabase.storage.createBucket('avatars', {
+          public: true
+        });
+        
+        if (createBucketError) throw createBucketError;
+      }
+
+      // Загрузка файла в хранилище Supabase
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file);
@@ -115,27 +136,27 @@ export default function EditProfilePage() {
         throw uploadError;
       }
 
-      // Get the public URL
+      // Получение публичного URL
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
       
       if (data) {
         setAvatarUrl(data.publicUrl);
         
-        // Update the profile with the new avatar URL
+        // Обновление профиля с новым URL аватара
         await updateUserProfile(user.id, {
           avatar_url: data.publicUrl,
         });
 
         toast({
-          title: "Avatar updated",
-          description: "Your profile picture has been updated successfully",
+          title: "Аватар обновлен",
+          description: "Ваша фотография профиля была успешно обновлена.",
         });
       }
     } catch (error) {
       console.error("Error uploading avatar:", error);
       toast({
-        title: "Upload failed",
-        description: "There was an error uploading your avatar",
+        title: "Ошибка загрузки",
+        description: "Произошла ошибка при загрузке аватара.",
         variant: "destructive",
       });
     } finally {
@@ -154,16 +175,16 @@ export default function EditProfilePage() {
       });
 
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully",
+        title: "Профиль обновлен",
+        description: "Ваш профиль был успешно обновлен.",
       });
 
       navigate("/profile");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Update failed",
-        description: "There was an error updating your profile",
+        title: "Ошибка обновления",
+        description: "Произошла ошибка при обновлении профиля.",
         variant: "destructive",
       });
     } finally {
@@ -180,121 +201,137 @@ export default function EditProfilePage() {
           onClick={() => navigate("/profile")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Profile
+          Вернуться к профилю
         </Button>
 
         <Card>
           <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
+            <CardTitle>Редактирование профиля</CardTitle>
             <CardDescription>
-              Update your profile information
+              Обновите информацию вашего профиля
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center mb-6">
-              <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={avatarUrl || undefined} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  <User />
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex items-center">
-                <Input
-                  id="avatar"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  className="hidden"
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={() => document.getElementById("avatar")?.click()}
-                  disabled={uploading}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {uploading ? "Uploading..." : "Upload Avatar"}
-                </Button>
+            {isLoading ? (
+              <div className="space-y-6">
+                <div className="flex flex-col items-center mb-6">
+                  <Skeleton className="h-24 w-24 rounded-full mb-4" />
+                  <Skeleton className="h-10 w-32" />
+                </div>
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-20 w-full mb-4" />
+                <Skeleton className="h-10 w-full" />
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex flex-col items-center mb-6">
+                  <Avatar className="h-24 w-24 mb-4">
+                    <AvatarImage src={avatarUrl || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                      <User />
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex items-center">
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => document.getElementById("avatar")?.click()}
+                      disabled={uploading}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {uploading ? "Загрузка..." : "Загрузить аватар"}
+                    </Button>
+                  </div>
+                </div>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="full_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="institution"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Institution</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="University or Organization" 
-                          {...field} 
-                          value={field.value || ""} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Your country" 
-                          {...field} 
-                          value={field.value || ""} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bio</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Tell us about yourself..." 
-                          className="resize-none h-20" 
-                          {...field} 
-                          value={field.value || ""} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-              </form>
-            </Form>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="full_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Полное имя</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Иван Иванов" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="institution"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Учебное заведение</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Университет или организация" 
+                              {...field} 
+                              value={field.value || ""} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Страна</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Ваша страна" 
+                              {...field} 
+                              value={field.value || ""} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="bio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>О себе</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Расскажите о себе..." 
+                              className="resize-none h-20" 
+                              {...field} 
+                              value={field.value || ""} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isLoading ? "Сохранение..." : "Сохранить изменения"}
+                    </Button>
+                  </form>
+                </Form>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

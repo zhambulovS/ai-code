@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ const ProblemDetailPage = () => {
   const problemId = parseInt(id || "0", 10);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   
   const [language, setLanguage] = useState("javascript");
   const [code, setCode] = useState(codeTemplates.javascript);
@@ -66,7 +68,7 @@ const ProblemDetailPage = () => {
   
   const { data: problem, isLoading: isLoadingProblem, error: problemError } = useProblem(problemId);
   const { data: testCases, isLoading: isLoadingTestCases } = useTestCases(problemId);
-  const { data: submissions, isLoading: isLoadingSubmissions } = useUserSubmissions(problemId, user?.id || "");
+  const { data: submissions, isLoading: isLoadingSubmissions, refetch: refetchSubmissions } = useUserSubmissions(problemId, user?.id || "");
   
   const submitMutation = useSubmitSolution();
   
@@ -108,11 +110,20 @@ const ProblemDetailPage = () => {
         variant: allPassed ? "default" : "destructive"
       });
     } catch (error) {
+      console.error("Error running tests:", error);
       toast({
         title: "Ошибка выполнения",
         description: error instanceof Error ? error.message : "Произошла неизвестная ошибка при выполнении кода",
         variant: "destructive"
       });
+      setTestResults([{
+        testCase: { input: "Error", expected_output: "N/A" },
+        output: "Error: " + (error instanceof Error ? error.message : "Неизвестная ошибка"),
+        expected: "N/A",
+        passed: false,
+        executionTime: 0,
+        error: error instanceof Error ? error.message : "Неизвестная ошибка"
+      }]);
     } finally {
       setIsRunning(false);
     }
@@ -140,6 +151,8 @@ const ProblemDetailPage = () => {
         user.id
       );
       
+      setTestResults(results);
+      
       const allPassed = results.every(r => r.passed);
       
       await submitMutation.mutateAsync({
@@ -152,6 +165,8 @@ const ProblemDetailPage = () => {
         memory_used: Math.max(...(results.map(r => r.memoryUsed || 0)), 0)
       });
       
+      await refetchSubmissions();
+      
       toast({
         title: allPassed ? "Решение принято!" : "Решение отправлено, но не все тесты пройдены",
         description: allPassed 
@@ -160,12 +175,11 @@ const ProblemDetailPage = () => {
         variant: allPassed ? "default" : "destructive"
       });
       
-      setTestResults(results);
-      
       if (allPassed) {
         setCurrentTab("submissions");
       }
     } catch (error) {
+      console.error("Submission error:", error);
       toast({
         title: "Ошибка отправки",
         description: error instanceof Error ? error.message : "Произошла неизвестная ошибка при отправке решения",
@@ -228,7 +242,7 @@ const ProblemDetailPage = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Примеры:</h3>
                       
-                      {testCases.map((example, index) => (
+                      {testCases.filter(tc => tc.is_sample).map((example, index) => (
                         <div key={index} className="bg-gray-50 p-4 rounded-md">
                           <div className="space-y-2">
                             <div>
@@ -267,7 +281,11 @@ const ProblemDetailPage = () => {
               onSubmit={handleSubmit}
             />
             
-            <TestResults results={testResults} />
+            <TestResults 
+              results={testResults} 
+              isRunning={isRunning}
+              onRerun={handleRunCode}
+            />
           </TabsContent>
           
           <TabsContent value="submissions">

@@ -1,34 +1,50 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
-export const useAuth = () => {
+// Create Authentication Context
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (email: string, password: string, userData: any) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<{ success: boolean; error?: string }>;
+  getUserProfile: () => Promise<any>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Auth Provider Component
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Auth state change:", event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
         if (event === 'SIGNED_OUT') {
           toast({
-            title: "Signed out",
-            description: "You have been signed out successfully",
+            title: "Вы вышли из системы",
+            description: "Вы успешно вышли из своей учетной записи",
           });
           navigate('/login');
         } else if (event === 'SIGNED_IN') {
           toast({
-            title: "Signed in",
-            description: "Welcome back!",
+            title: "Вы вошли в систему",
+            description: "Добро пожаловать!",
           });
           // Navigate to profile page on successful sign in
           navigate('/profile');
@@ -50,7 +66,7 @@ export const useAuth = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -117,5 +133,27 @@ export const useAuth = () => {
     }
   };
 
-  return { user, session, loading, login, signup, logout, getUserProfile };
+  const value = {
+    user,
+    session,
+    loading,
+    login,
+    signup,
+    logout,
+    getUserProfile,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+// Hook to use Auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Export the AuthProvider
+export default AuthProvider;

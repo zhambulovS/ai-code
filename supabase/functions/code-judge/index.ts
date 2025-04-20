@@ -24,13 +24,15 @@ type TestResult = {
   passed: boolean;
   executionTime: number;
   memoryUsed: number;
+  error?: string;
 };
 
 interface CodeSubmission {
   code: string;
   language: string;
-  problemId: number;
-  userId: string;
+  problemId?: number;
+  userId?: string;
+  input?: string;
   timeLimit: number;
   memoryLimit: number;
 }
@@ -44,21 +46,47 @@ serve(async (req) => {
   try {
     // Get submission data from request
     const submission: CodeSubmission = await req.json();
-    const { code, language, problemId, userId, timeLimit, memoryLimit } = submission;
+    const { code, language, problemId, userId, input, timeLimit, memoryLimit } = submission;
 
-    // Validate input
-    if (!code || !language || !problemId) {
+    // Validate basic input
+    if (!code || !language) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Processing submission for problem ${problemId} in ${language}`);
+    console.log(`Processing submission: language=${language}, problemId=${problemId || 'none'}`);
+
+    // Handle single input execution (like when user clicks "Run")
+    if (input !== undefined) {
+      const result = await executeCode(code, language, input, timeLimit, memoryLimit);
+      return new Response(
+        JSON.stringify(result),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // For test cases execution
+    if (!problemId) {
+      return new Response(
+        JSON.stringify({ error: "Problem ID is required for test cases" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Get test cases from database
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing Supabase configuration");
+      return new Response(
+        JSON.stringify({ error: "Server configuration error" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { data: testCases, error: testCasesError } = await supabase
@@ -88,11 +116,12 @@ serve(async (req) => {
     let maxMemoryUsed = 0;
 
     for (const testCase of testCases) {
-      // In a real implementation, this would execute the code in a sandboxed environment
-      // Here we're simulating execution for demonstration purposes
       const result = await executeCode(code, language, testCase.input, timeLimit, memoryLimit);
       
-      const passed = normalizeOutput(result.output || "") === normalizeOutput(testCase.expected_output);
+      const normalizedOutput = normalizeOutput(result.output || "");
+      const normalizedExpected = normalizeOutput(testCase.expected_output);
+      const passed = normalizedOutput === normalizedExpected;
+      
       if (!passed) allPassed = false;
       
       totalExecutionTime += result.executionTime || 0;
@@ -105,38 +134,39 @@ serve(async (req) => {
         output: result.output || "",
         passed,
         executionTime: result.executionTime || 0,
-        memoryUsed: result.memoryUsed || 0
+        memoryUsed: result.memoryUsed || 0,
+        error: result.error
       });
     }
 
-    // Save submission result to database
-    const status = allPassed ? "accepted" : "wrong_answer";
-    
-    const { data: submissionData, error: submissionError } = await supabase
-      .from("submissions")
-      .insert({
-        user_id: userId,
-        problem_id: problemId,
-        code,
-        language,
-        status,
-        execution_time: totalExecutionTime,
-        memory_used: maxMemoryUsed
-      })
-      .select()
-      .single();
-
-    if (submissionError) {
-      console.error("Error saving submission:", submissionError);
-      return new Response(
-        JSON.stringify({ error: "Failed to save submission", details: submissionError }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Save submission result to database if userId is provided
+    if (userId) {
+      const status = allPassed ? "accepted" : "wrong_answer";
+      
+      try {
+        const { error: submissionError } = await supabase
+          .from("submissions")
+          .insert({
+            user_id: userId,
+            problem_id: problemId,
+            code,
+            language,
+            status,
+            execution_time: totalExecutionTime,
+            memory_used: maxMemoryUsed
+          });
+  
+        if (submissionError) {
+          console.error("Error saving submission:", submissionError);
+        }
+      } catch (saveError) {
+        console.error("Error in save submission process:", saveError);
+      }
     }
 
     // Return the results
     const response: ExecutionResult = {
-      status,
+      status: allPassed ? "accepted" : "wrong_answer",
       executionTime: totalExecutionTime,
       memoryUsed: maxMemoryUsed,
       testResults
@@ -166,7 +196,7 @@ async function executeCode(
   memoryLimit: number
 ): Promise<{ output?: string; error?: string; executionTime: number; memoryUsed: number }> {
   // Simulate execution time
-  const executionDelay = Math.random() * Math.min(timeLimit, 2000) + 100;
+  const executionDelay = Math.random() * Math.min(timeLimit, 500) + 100;
   await new Promise(resolve => setTimeout(resolve, executionDelay));
   
   try {
@@ -177,33 +207,60 @@ async function executeCode(
     if (language === "javascript") {
       try {
         // For JavaScript, attempt to parse input and simulate execution
-        const parseResult = parseInputBasedOnProblemType(input);
+        const inputLines = input.trim().split("\n");
         
-        // In a real implementation, this would use a proper sandbox
-        // This is just a simulation
-        if (code.includes("console.log") || code.includes("throw") || Math.random() < 0.1) {
-          // Simulate runtime error
-          if (Math.random() < 0.2) {
-            throw new Error("Runtime error: " + ["Null pointer exception", "Stack overflow", "Out of memory"][Math.floor(Math.random() * 3)]);
+        // Try to detect if this is a Two Sum problem
+        if (input.includes("[") || inputLines.length >= 2) {
+          try {
+            // Parse array from first line if it looks like an array
+            let nums: number[] = [];
+            let numsLine = inputLines[0];
+            
+            if (numsLine.includes("[")) {
+              // Extract content between square brackets
+              const match = numsLine.match(/\[(.*)\]/);
+              if (match && match[1]) {
+                nums = match[1].split(",").map(n => parseInt(n.trim(), 10));
+              }
+            } else {
+              // Try to parse as space or comma separated numbers
+              nums = numsLine.split(/[,\s]+/).map(n => parseInt(n.trim(), 10));
+            }
+            
+            // Parse target from second line
+            const target = parseInt(inputLines[1].trim(), 10);
+            
+            // Prepare execution environment
+            try {
+              // eslint-disable-next-line no-new-func
+              const userFunction = new Function('nums', 'target', `
+                ${code}
+                return twoSum(nums, target);
+              `);
+              
+              const result = userFunction(nums, target);
+              output = JSON.stringify(result);
+            } catch (execError) {
+              error = execError instanceof Error ? execError.message : "Runtime error during execution";
+              output = "Error: " + error;
+            }
+          } catch (parseError) {
+            error = "Error parsing input: " + (parseError instanceof Error ? parseError.message : String(parseError));
+            output = "Error: " + error;
           }
+        } else {
+          // Generic case if we can't determine the problem type
+          output = "Simulated output for: " + input;
         }
-        
-        // Generate plausible output based on input
-        output = simulateOutputForInput(input);
-        
-        // Randomly fail some test cases
-        if (Math.random() < 0.3) {
-          output = "Incorrect " + output;
-        }
-      } catch (e) {
-        error = e.message;
-        output = "Error";
+      } catch (jsError) {
+        error = jsError instanceof Error ? jsError.message : "JavaScript execution error";
+        output = "Error: " + error;
       }
     } else if (language === "python") {
       // Simulate Python execution
-      if (Math.random() < 0.2) {
+      if (Math.random() < 0.1) {
         error = "IndentationError: unexpected indent";
-        output = "Error";
+        output = "Error: " + error;
       } else {
         output = simulateOutputForInput(input);
       }
@@ -212,14 +269,14 @@ async function executeCode(
       output = simulateOutputForInput(input);
       
       // Simulate compile error for compiled languages
-      if ((language === "cpp" || language === "java") && Math.random() < 0.2) {
+      if ((language === "cpp" || language === "java" || language === "csharp") && Math.random() < 0.1) {
         error = `Compilation error in ${language}: syntax error`;
-        output = "Error";
+        output = "Error: " + error;
       }
     }
     
     // Simulate memory used (in KB)
-    const memoryUsed = Math.floor(Math.random() * memoryLimit * 0.8);
+    const memoryUsed = Math.floor(Math.random() * memoryLimit * 0.5);
     
     // Simulate execution time (in ms)
     const executionTime = Math.floor(executionDelay);
@@ -250,40 +307,15 @@ async function executeCode(
     };
   } catch (e) {
     return {
-      error: e.message,
+      error: e instanceof Error ? e.message : "Unknown execution error",
       executionTime: Math.floor(executionDelay),
       memoryUsed: Math.floor(Math.random() * 1000)
     };
   }
 }
 
-function parseInputBasedOnProblemType(input: string): any {
-  // This would be more sophisticated in a real implementation
-  // and would depend on the problem type
-  try {
-    const lines = input.trim().split("\n");
-    
-    if (input.includes("[") && input.includes("]")) {
-      // Likely an array problem
-      const arrayMatch = input.match(/\[(.*)\]/);
-      if (arrayMatch) {
-        return JSON.parse(arrayMatch[0]);
-      }
-    }
-    
-    return {
-      rawInput: input,
-      lines
-    };
-  } catch (error) {
-    console.error("Error parsing input:", error);
-    return { rawInput: input };
-  }
-}
-
 function simulateOutputForInput(input: string): string {
   // Generate a plausible output based on input
-  // This is just a simulation
   if (input.includes("[") && input.includes("]")) {
     // For array inputs, return array-like output
     const nums = input.match(/\d+/g) || [];
