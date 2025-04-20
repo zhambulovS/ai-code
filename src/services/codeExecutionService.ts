@@ -99,7 +99,7 @@ export const executeCode = async (
               success = true;
             } catch (e) {
               success = false;
-              error = e instanceof Error ? e.message : "Ошибка выполнения кода";
+              error = e instanceof Error ? e.message : "Code execution error";
               output = "Error";
               console.error("Code execution error:", e);
             }
@@ -248,8 +248,16 @@ const normalizeOutput = (output: string): string => {
 // Helper function for parsing input data for Two Sum problem
 const parseInputForTwoSum = (input: string): { nums: number[], target: number } => {
   try {
+    if (!input || typeof input !== 'string') {
+      return { nums: [], target: 0 };
+    }
+
     // Split input by lines
     const lines = input.trim().split("\n");
+    
+    if (lines.length < 2) {
+      return { nums: [], target: 0 };
+    }
     
     // Parse the array of numbers from the first line
     let numsString = lines[0].trim();

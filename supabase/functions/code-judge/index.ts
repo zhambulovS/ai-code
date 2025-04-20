@@ -203,6 +203,16 @@ async function executeCode(
     let output = "";
     let error = undefined;
     
+    // Validate input to prevent errors
+    if (!input || typeof input !== 'string') {
+      return {
+        output: "Error: Invalid input",
+        error: "Invalid input data",
+        executionTime: 1,
+        memoryUsed: 0
+      };
+    }
+    
     // Simple simulation for different languages
     if (language === "javascript") {
       try {
@@ -228,7 +238,7 @@ async function executeCode(
             }
             
             // Parse target from second line
-            const target = parseInt(inputLines[1].trim(), 10);
+            const target = parseInt(inputLines[1]?.trim() || "0", 10);
             
             // Prepare execution environment
             try {

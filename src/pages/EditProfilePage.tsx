@@ -33,12 +33,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   full_name: z.string().min(2, {
-    message: "Имя должно содержать минимум 2 символа.",
+    message: "Name must contain at least 2 characters.",
   }),
   institution: z.string().optional(),
   country: z.string().optional(),
   bio: z.string().max(300, {
-    message: "Биография не может быть длиннее 300 символов.",
+    message: "Bio cannot be longer than 300 characters.",
   }).optional(),
 });
 
@@ -63,8 +63,8 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (!user) {
       toast({
-        title: "Требуется вход в систему",
-        description: "Для редактирования профиля необходимо войти в систему.",
+        title: "Login Required",
+        description: "You need to be logged in to edit your profile.",
         variant: "destructive",
       });
       navigate("/login");
@@ -87,8 +87,8 @@ export default function EditProfilePage() {
       } catch (error) {
         console.error("Error loading user profile:", error);
         toast({
-          title: "Ошибка",
-          description: "Не удалось загрузить данные профиля.",
+          title: "Error",
+          description: "Failed to load profile data.",
           variant: "destructive",
         });
       } finally {
@@ -107,12 +107,12 @@ export default function EditProfilePage() {
     const file = event.target.files[0];
     const fileExt = file.name.split(".").pop();
     const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const filePath = `${fileName}`;
 
     setUploading(true);
 
     try {
-      // Проверяем, существует ли бакет, и создаем его, если нет
+      // First ensure the "avatars" bucket exists
       const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
       
       if (bucketsError) throw bucketsError;
@@ -127,7 +127,7 @@ export default function EditProfilePage() {
         if (createBucketError) throw createBucketError;
       }
 
-      // Загрузка файла в хранилище Supabase
+      // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file);
@@ -136,27 +136,27 @@ export default function EditProfilePage() {
         throw uploadError;
       }
 
-      // Получение публичного URL
+      // Get public URL
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
       
       if (data) {
         setAvatarUrl(data.publicUrl);
         
-        // Обновление профиля с новым URL аватара
+        // Update profile with new avatar URL
         await updateUserProfile(user.id, {
           avatar_url: data.publicUrl,
         });
 
         toast({
-          title: "Аватар обновлен",
-          description: "Ваша фотография профиля была успешно обновлена.",
+          title: "Avatar Updated",
+          description: "Your profile picture has been successfully updated.",
         });
       }
     } catch (error) {
       console.error("Error uploading avatar:", error);
       toast({
-        title: "Ошибка загрузки",
-        description: "Произошла ошибка при загрузке аватара.",
+        title: "Upload Error",
+        description: "An error occurred while uploading the avatar.",
         variant: "destructive",
       });
     } finally {
@@ -175,16 +175,16 @@ export default function EditProfilePage() {
       });
 
       toast({
-        title: "Профиль обновлен",
-        description: "Ваш профиль был успешно обновлен.",
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
       });
 
       navigate("/profile");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Ошибка обновления",
-        description: "Произошла ошибка при обновлении профиля.",
+        title: "Update Error",
+        description: "An error occurred while updating your profile.",
         variant: "destructive",
       });
     } finally {
@@ -201,14 +201,14 @@ export default function EditProfilePage() {
           onClick={() => navigate("/profile")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Вернуться к профилю
+          Back to Profile
         </Button>
 
         <Card>
           <CardHeader>
-            <CardTitle>Редактирование профиля</CardTitle>
+            <CardTitle>Edit Profile</CardTitle>
             <CardDescription>
-              Обновите информацию вашего профиля
+              Update your profile information
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -248,7 +248,7 @@ export default function EditProfilePage() {
                       disabled={uploading}
                     >
                       <Upload className="h-4 w-4 mr-2" />
-                      {uploading ? "Загрузка..." : "Загрузить аватар"}
+                      {uploading ? "Uploading..." : "Upload Avatar"}
                     </Button>
                   </div>
                 </div>
@@ -260,9 +260,9 @@ export default function EditProfilePage() {
                       name="full_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Полное имя</FormLabel>
+                          <FormLabel>Full Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Иван Иванов" {...field} />
+                            <Input placeholder="John Doe" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -273,10 +273,10 @@ export default function EditProfilePage() {
                       name="institution"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Учебное заведение</FormLabel>
+                          <FormLabel>Institution</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="Университет или организация" 
+                              placeholder="University or organization" 
                               {...field} 
                               value={field.value || ""} 
                             />
@@ -290,10 +290,10 @@ export default function EditProfilePage() {
                       name="country"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Страна</FormLabel>
+                          <FormLabel>Country</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="Ваша страна" 
+                              placeholder="Your country" 
                               {...field} 
                               value={field.value || ""} 
                             />
@@ -307,10 +307,10 @@ export default function EditProfilePage() {
                       name="bio"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>О себе</FormLabel>
+                          <FormLabel>About Me</FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="Расскажите о себе..." 
+                              placeholder="Tell us about yourself..." 
                               className="resize-none h-20" 
                               {...field} 
                               value={field.value || ""} 
@@ -326,7 +326,7 @@ export default function EditProfilePage() {
                       disabled={isLoading}
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      {isLoading ? "Сохранение..." : "Сохранить изменения"}
+                      {isLoading ? "Saving..." : "Save Changes"}
                     </Button>
                   </form>
                 </Form>

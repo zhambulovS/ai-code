@@ -18,7 +18,7 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
     <Card>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-semibold">Результаты тестирования</h3>
+          <h3 className="text-lg font-semibold">Test Results</h3>
           {onRerun && (
             <Button 
               variant="outline" 
@@ -27,7 +27,7 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
               disabled={isRunning}
             >
               <RefreshCw className="h-4 w-4 mr-1" />
-              Запустить снова
+              Run Again
             </Button>
           )}
         </div>
@@ -35,17 +35,17 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
         {isRunning ? (
           <div className="flex flex-col items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-3"></div>
-            <p className="text-gray-600">Выполнение тестов...</p>
+            <p className="text-gray-600">Running tests...</p>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant={results.every(r => r.passed) ? "success" : "destructive"}>
-                {results.filter(r => r.passed).length}/{results.length} тестов пройдено
+              <Badge variant={results.every(r => r.passed) ? "default" : "destructive"} className={results.every(r => r.passed) ? "bg-green-500" : ""}>
+                {results.filter(r => r.passed).length}/{results.length} tests passed
               </Badge>
               {results.length > 0 && (
                 <Badge variant="outline">
-                  Среднее время: {(results.reduce((acc, r) => acc + r.executionTime, 0) / results.length).toFixed(2)} мс
+                  Average time: {(results.reduce((acc, r) => acc + r.executionTime, 0) / results.length).toFixed(2)} ms
                 </Badge>
               )}
             </div>
@@ -53,7 +53,7 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
             {results.map((result, index) => (
               <div key={index} className={`border rounded-md p-3 ${result.passed ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">Тест {index + 1}</span>
+                  <span className="font-medium">Test {index + 1}</span>
                   <div className="flex items-center">
                     {result.passed ? (
                       <Check className="h-5 w-5 text-green-500 mr-1" />
@@ -61,29 +61,29 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
                       <X className="h-5 w-5 text-red-500 mr-1" />
                     )}
                     <span className={result.passed ? 'text-green-600' : 'text-red-600'}>
-                      {result.passed ? 'Пройден' : 'Не пройден'}
+                      {result.passed ? 'Passed' : 'Failed'}
                     </span>
                   </div>
                 </div>
                 <div className="space-y-1 text-sm">
                   <div className="bg-white bg-opacity-50 p-2 rounded">
-                    <span className="font-medium">Вход:</span> {result.testCase.input.replace(/\n/g, ', ')}
+                    <span className="font-medium">Input:</span> {result.testCase.input.replace(/\n/g, ', ')}
                   </div>
                   <div className="bg-white bg-opacity-50 p-2 rounded">
-                    <span className="font-medium">Ваш вывод:</span> {result.output}
+                    <span className="font-medium">Your output:</span> {result.output}
                   </div>
                   <div className="bg-white bg-opacity-50 p-2 rounded">
-                    <span className="font-medium">Ожидаемый вывод:</span> {result.expected}
+                    <span className="font-medium">Expected output:</span> {result.expected}
                   </div>
                   <div className="flex flex-wrap gap-x-4 mt-2">
                     <div className="flex items-center">
                       <TimerIcon className="h-4 w-4 mr-1 text-gray-500" />
-                      <span className="text-gray-600">Время: {result.executionTime} мс</span>
+                      <span className="text-gray-600">Time: {result.executionTime} ms</span>
                     </div>
                     {result.memoryUsed !== undefined && (
                       <div className="flex items-center">
                         <HardDrive className="h-4 w-4 mr-1 text-gray-500" />
-                        <span className="text-gray-600">Память: {(result.memoryUsed / 1024).toFixed(2)} МБ</span>
+                        <span className="text-gray-600">Memory: {(result.memoryUsed / 1024).toFixed(2)} MB</span>
                       </div>
                     )}
                   </div>
