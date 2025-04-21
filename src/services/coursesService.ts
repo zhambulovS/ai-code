@@ -183,7 +183,12 @@ export const fetchTestQuestions = async (testId: string): Promise<TestQuestion[]
       .order('order_index', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    
+    // Transform the data to ensure options is Record<string, string>
+    return (data || []).map(question => ({
+      ...question,
+      options: question.options as unknown as Record<string, string>
+    }));
   } catch (error) {
     console.error('Error fetching test questions:', error);
     return [];

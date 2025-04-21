@@ -4,12 +4,12 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MainNavigation() {
   const location = useLocation();
-  const { user, loading, signOut } = useAuth();
-  const isMobile = useMobile();
+  const { user, loading, logout } = useAuth();
+  const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -74,7 +74,7 @@ export default function MainNavigation() {
                   My Profile
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={signOut}>
+              <Button variant="ghost" size="sm" onClick={logout}>
                 Logout
               </Button>
             </>
@@ -120,7 +120,7 @@ export default function MainNavigation() {
                       My Profile
                     </Button>
                   </Link>
-                  <Button variant="ghost" size="sm" onClick={signOut} className="w-full">
+                  <Button variant="ghost" size="sm" onClick={logout} className="w-full">
                     Logout
                   </Button>
                 </>
