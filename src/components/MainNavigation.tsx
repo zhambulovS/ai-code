@@ -1,179 +1,147 @@
 
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  BookOpen, 
-  Code, 
-  BarChart, 
-  User, 
-  LogIn, 
-  LogOut,
-  Menu, 
-  X
-} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useMobile } from "@/hooks/use-mobile";
 
-const MainNavigation = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { user, loading, logout } = useAuth();
-  const navigate = useNavigate();
+export default function MainNavigation() {
+  const location = useLocation();
+  const { user, loading, signOut } = useAuth();
+  const isMobile = useMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
-    const result = await logout();
-    if (result.success) {
-      navigate('/login');
-    }
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  const navItems = [
+    { path: "/", label: "Home" },
+    { path: "/problems", label: "Problems" },
+    { path: "/courses", label: "Courses" },
+    { path: "/leaderboard", label: "Leaderboard" },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Code className="h-7 w-7 text-primary" />
-              <span className="text-xl font-bold text-gray-900">CodeOlympiad</span>
-            </Link>
-            
-            <div className="hidden md:flex ml-10 space-x-8">
-              <Link to="/problems" className="text-gray-700 hover:text-primary flex items-center">
-                <BookOpen className="mr-1 h-4 w-4" />
-                <span>Problems</span>
+    <header className="bg-background border-b border-border sticky top-0 z-50">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-6 md:gap-8 lg:gap-10">
+          <Link to="/" className="font-bold text-xl flex items-center">
+            CodeMaster
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  location.pathname === item.path ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {item.label}
               </Link>
-              <Link to="/leaderboard" className="text-gray-700 hover:text-primary flex items-center">
-                <BarChart className="mr-1 h-4 w-4" />
-                <span>Leaderboard</span>
+            ))}
+          </nav>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle Menu"
+            onClick={toggleMenu}
+            className="h-9 w-9"
+          >
+            {isMenuOpen ? <X /> : <Menu />}
+          </Button>
+        </div>
+
+        {/* Auth Buttons (Desktop) */}
+        <div className="hidden md:flex items-center gap-2">
+          {!loading && user ? (
+            <>
+              <Link to="/profile">
+                <Button variant="outline" size="sm">
+                  My Profile
+                </Button>
               </Link>
+              <Button variant="ghost" size="sm" onClick={signOut}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="default" size="sm">
+                  Register
+                </Button>
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && isMobile && (
+        <div className="md:hidden border-t border-border">
+          <div className="container px-4 py-3 flex flex-col">
+            <nav className="flex flex-col space-y-3 py-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`text-sm font-medium transition-colors px-2 py-1.5 hover:text-primary ${
+                    location.pathname === item.path ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="border-t border-border mt-2 pt-3 flex flex-col gap-2">
+              {!loading && user ? (
+                <>
+                  <Link to="/profile" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full">
+                      My Profile
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="sm" onClick={signOut} className="w-full">
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="w-full">
+                    <Button variant="ghost" size="sm" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register" className="w-full">
+                    <Button variant="default" size="sm" className="w-full">
+                      Register
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
-          
-          <div className="hidden md:flex items-center space-x-4">
-            {loading ? (
-              <div className="h-10 w-10 animate-pulse bg-gray-200 rounded-full"></div>
-            ) : user ? (
-              <>
-                <Link to="/profile">
-                  <Button variant="ghost" className="text-gray-700 hover:text-primary">
-                    <User className="mr-1 h-4 w-4" />
-                    <span>Profile</span>
-                  </Button>
-                </Link>
-                <Button variant="outline" onClick={handleLogout} className="text-gray-700">
-                  <LogOut className="mr-1 h-4 w-4" />
-                  <span>Log out</span>
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="outline" className="text-gray-700">
-                    <LogIn className="mr-1 h-4 w-4" />
-                    <span>Log in</span>
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button>Sign up</Button>
-                </Link>
-              </>
-            )}
-          </div>
-          
-          <div className="md:hidden flex items-center">
-            <button 
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-primary focus:outline-none"
-            >
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
-          </div>
         </div>
-        
-        {/* Mobile menu */}
-        {isOpen && (
-          <div className="md:hidden pt-2 pb-4 space-y-2 animate-fade-in">
-            <Link 
-              to="/problems" 
-              className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-              onClick={() => setIsOpen(false)}
-            >
-              <div className="flex items-center">
-                <BookOpen className="mr-2 h-4 w-4" />
-                <span>Problems</span>
-              </div>
-            </Link>
-            <Link 
-              to="/leaderboard" 
-              className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-              onClick={() => setIsOpen(false)}
-            >
-              <div className="flex items-center">
-                <BarChart className="mr-2 h-4 w-4" />
-                <span>Leaderboard</span>
-              </div>
-            </Link>
-            {loading ? (
-              <div className="px-3 py-2">
-                <div className="h-8 w-24 animate-pulse bg-gray-200 rounded"></div>
-              </div>
-            ) : user ? (
-              <>
-                <Link 
-                  to="/profile" 
-                  className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </div>
-                </Link>
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleLogout();
-                  }}
-                  className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-                >
-                  <div className="flex items-center">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </div>
-                </button>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/login" 
-                  className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="flex items-center">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    <span>Log in</span>
-                  </div>
-                </Link>
-                <Link 
-                  to="/register" 
-                  className="block px-3 py-2 text-gray-700 hover:bg-primary/10 rounded-md"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Sign up</span>
-                  </div>
-                </Link>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    </nav>
+      )}
+    </header>
   );
-};
-
-export default MainNavigation;
+}

@@ -11,6 +11,10 @@ import ProblemDetailPage from "./pages/ProblemDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import CoursesPage from "./pages/CoursesPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import LessonPage from "./pages/LessonPage";
+import TestPage from "./pages/TestPage";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryProvider } from "./providers/QueryProvider";
 import AuthProvider from "./hooks/useAuth";
@@ -42,6 +46,10 @@ function App() {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="edit-profile" element={<EditProfilePage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
+              <Route path="courses" element={<CoursesPage />} />
+              <Route path="courses/:id" element={<CourseDetailPage />} />
+              <Route path="courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
+              <Route path="courses/:courseId/tests/:testId" element={<TestPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

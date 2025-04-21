@@ -2,15 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Star, ArrowRight } from "lucide-react";
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  level: string;
-  tags: string[];
-  rating: number;
-}
+import { Course } from "@/services/recommendationService";
+import { Link } from "react-router-dom";
 
 interface CourseRecommendationsProps {
   courses: Course[];
@@ -37,13 +30,13 @@ export function CourseRecommendations({ courses }: CourseRecommendationsProps) {
                 <p className="text-sm text-gray-600 mb-2">{course.description}</p>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {course.tags.map((tag) => (
-                    <span key={tag} className="bg-primary-50 text-primary text-xs px-2 py-1 rounded-full">
+                    <span key={tag} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
                       {tag}
                     </span>
                   ))}
                 </div>
                 <div className="flex items-center">
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{course.level}</span>
+                  <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{course.difficulty}</span>
                   <div className="flex items-center ml-4">
                     <Star className="h-3 w-3 text-yellow-500 mr-1" />
                     <span className="text-xs">{course.rating.toFixed(1)}</span>
@@ -51,8 +44,10 @@ export function CourseRecommendations({ courses }: CourseRecommendationsProps) {
                 </div>
               </div>
               <div className="flex items-center mt-4 md:mt-0">
-                <Button size="sm" className="w-full md:w-auto">
-                  View Course <ArrowRight className="h-4 w-4 ml-2" />
+                <Button size="sm" className="w-full md:w-auto" asChild>
+                  <Link to={`/courses/${course.id}`}>
+                    View Course <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
                 </Button>
               </div>
             </div>
