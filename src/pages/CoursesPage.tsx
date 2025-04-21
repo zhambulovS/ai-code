@@ -54,7 +54,7 @@ export default function CoursesPage() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Levels</SelectItem>
+              <SelectItem value="all">All Levels</SelectItem>
               <SelectItem value="Beginner">Beginner</SelectItem>
               <SelectItem value="Intermediate">Intermediate</SelectItem>
               <SelectItem value="Advanced">Advanced</SelectItem>
