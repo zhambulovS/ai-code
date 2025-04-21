@@ -104,14 +104,15 @@ export const checkCourseCompletion = async (
   courseId: string
 ): Promise<boolean> => {
   try {
-    // Get course data
-    const { data: course } = await supabase
+    // Get course data with lessons and tests
+    const { data: course, error } = await supabase
       .from('courses')
       .select('*, lessons(*), tests(*)')
       .eq('id', courseId)
       .single();
     
-    if (!course || !course.lessons) {
+    if (error || !course) {
+      console.error("Error fetching course:", error);
       return false;
     }
 
@@ -128,14 +129,16 @@ export const checkCourseCompletion = async (
     }
 
     // Check if all lessons are completed
-    const allLessonsCompleted = course.lessons.every(
-      (lesson: any) => progress.completed_lessons.includes(lesson.id)
-    );
+    const allLessonsCompleted = course.lessons.length > 0 && 
+      course.lessons.every((lesson: any) => 
+        progress.completed_lessons.includes(lesson.id)
+      );
     
     // Check if all required tests are completed
-    const allRequiredTestsCompleted = !course.tests || course.tests.every(
-      (test: any) => progress.completed_tests.includes(test.id)
-    );
+    const allRequiredTestsCompleted = course.tests.length === 0 || 
+      course.tests.every((test: any) => 
+        progress.completed_tests.includes(test.id)
+      );
     
     return allLessonsCompleted && allRequiredTestsCompleted;
   } catch (error) {

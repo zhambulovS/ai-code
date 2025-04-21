@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +15,7 @@ import {
   submitTestAttempt,
   fetchCourseById
 } from "@/services/coursesService";
+import { checkCourseCompletion, createCourseCompletionAchievement } from "@/services/achievementsService";
 
 export default function TestPage() {
   const { courseId, testId } = useParams<{ courseId: string; testId: string }>();
@@ -40,43 +40,36 @@ export default function TestPage() {
     }
   }, [user, courseId, testId, navigate, toast]);
 
-  // Fetch test data
   const { data: test, isLoading: isLoadingTest } = useQuery({
     queryKey: ['test', testId],
     queryFn: () => fetchTestById(testId || ''),
     enabled: !!testId && !!user,
   });
 
-  // Fetch course data
   const { data: course } = useQuery({
     queryKey: ['course', courseId],
     queryFn: () => fetchCourseById(courseId || ''),
     enabled: !!courseId && !!user,
   });
 
-  // Fetch test questions
   const { data: questions = [], isLoading: isLoadingQuestions } = useQuery({
     queryKey: ['testQuestions', testId],
     queryFn: () => fetchTestQuestions(testId || ''),
     enabled: !!testId && !!user,
   });
 
-  // Submit test attempt
   const { mutate: submitTest, isPending: isSubmitting } = useMutation({
     mutationFn: () => submitTestAttempt(testId || '', user?.id || '', answers),
     onSuccess: async (data) => {
       setTestResult(data);
       setShowResults(true);
       
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['courseProgress', courseId, user?.id] });
       
-      // Check if the test was passed and the course is now complete
       if (data.passed && course) {
         const isCompleted = await checkCourseCompletion(user?.id || '', courseId || '');
         
         if (isCompleted) {
-          // Grant achievement for course completion
           const achievement = await createCourseCompletionAchievement(
             user?.id || '',
             courseId || '',
@@ -90,7 +83,6 @@ export default function TestPage() {
               variant: "default"
             });
             
-            // Invalidate achievements query
             queryClient.invalidateQueries({ queryKey: ['achievements', user?.id] });
           }
         }
@@ -122,7 +114,6 @@ export default function TestPage() {
   };
 
   const handleSubmit = () => {
-    // Check if all questions have been answered
     const answeredCount = Object.keys(answers).length;
     
     if (answeredCount < questions.length) {
@@ -163,7 +154,6 @@ export default function TestPage() {
     );
   }
 
-  // If showing results
   if (showResults && testResult) {
     return (
       <div className="container mx-auto py-8 px-4">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -112,19 +111,21 @@ export default function EditProfilePage() {
     setUploading(true);
 
     try {
-      // First ensure the "avatars" bucket exists
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) throw bucketsError;
+      // Check if the "avatars" bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
       
       const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
       
       if (!avatarBucketExists) {
+        // Create the bucket if it doesn't exist
         const { error: createBucketError } = await supabase.storage.createBucket('avatars', {
           public: true
         });
         
-        if (createBucketError) throw createBucketError;
+        if (createBucketError) {
+          console.error("Error creating bucket:", createBucketError);
+          throw createBucketError;
+        }
       }
 
       // Upload file to Supabase Storage
@@ -133,6 +134,7 @@ export default function EditProfilePage() {
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error("Error uploading file:", uploadError);
         throw uploadError;
       }
 
