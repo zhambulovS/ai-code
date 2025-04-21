@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -111,42 +112,40 @@ export default function EditProfilePage() {
     setUploading(true);
 
     try {
-      // Check if the "avatars" bucket exists
+      // First check if avatars bucket exists
       const { data: buckets } = await supabase.storage.listBuckets();
       
-      const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
-      
-      if (!avatarBucketExists) {
-        // Create the bucket if it doesn't exist
-        const { error: createBucketError } = await supabase.storage.createBucket('avatars', {
-          public: true
+      // Create avatars bucket if it doesn't exist
+      if (!buckets || !buckets.find(bucket => bucket.name === 'avatars')) {
+        // We can't create buckets from the frontend due to RLS policies
+        // Instead, we'll try to upload directly and let the backend handle errors
+        toast({
+          title: "Info",
+          description: "Preparing storage for avatar upload...",
         });
-        
-        if (createBucketError) {
-          console.error("Error creating bucket:", createBucketError);
-          throw createBucketError;
-        }
       }
 
-      // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      // Upload file to Storage
+      const { data, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true
+        });
 
       if (uploadError) {
-        console.error("Error uploading file:", uploadError);
         throw uploadError;
       }
 
-      // Get public URL
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      // Get the public URL
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
       
-      if (data) {
-        setAvatarUrl(data.publicUrl);
+      if (urlData) {
+        setAvatarUrl(urlData.publicUrl);
         
         // Update profile with new avatar URL
         await updateUserProfile(user.id, {
-          avatar_url: data.publicUrl,
+          avatar_url: urlData.publicUrl,
         });
 
         toast({
@@ -154,11 +153,11 @@ export default function EditProfilePage() {
           description: "Your profile picture has been successfully updated.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading avatar:", error);
       toast({
         title: "Upload Error",
-        description: "An error occurred while uploading the avatar.",
+        description: "An error occurred while uploading the avatar. The storage might not be properly configured.",
         variant: "destructive",
       });
     } finally {

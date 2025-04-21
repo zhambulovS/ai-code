@@ -105,14 +105,14 @@ export const checkCourseCompletion = async (
 ): Promise<boolean> => {
   try {
     // Get course data with lessons and tests
-    const { data: course, error } = await supabase
+    const { data: course, error: courseError } = await supabase
       .from('courses')
       .select('*, lessons(*), tests(*)')
       .eq('id', courseId)
       .single();
     
-    if (error || !course) {
-      console.error("Error fetching course:", error);
+    if (courseError || !course) {
+      console.error("Error fetching course:", courseError);
       return false;
     }
 
