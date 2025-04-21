@@ -64,12 +64,37 @@ export default function TestPage() {
   // Submit test attempt
   const { mutate: submitTest, isPending: isSubmitting } = useMutation({
     mutationFn: () => submitTestAttempt(testId || '', user?.id || '', answers),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setTestResult(data);
       setShowResults(true);
       
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['courseProgress', courseId, user?.id] });
+      
+      // Check if the test was passed and the course is now complete
+      if (data.passed && course) {
+        const isCompleted = await checkCourseCompletion(user?.id || '', courseId || '');
+        
+        if (isCompleted) {
+          // Grant achievement for course completion
+          const achievement = await createCourseCompletionAchievement(
+            user?.id || '',
+            courseId || '',
+            course.title
+          );
+          
+          if (achievement) {
+            toast({
+              title: "Achievement Unlocked!",
+              description: achievement.title,
+              variant: "default"
+            });
+            
+            // Invalidate achievements query
+            queryClient.invalidateQueries({ queryKey: ['achievements', user?.id] });
+          }
+        }
+      }
       
       toast({
         title: data.passed ? "Test passed!" : "Test not passed",

@@ -13,6 +13,9 @@ export const executeCode = async (
   input: string
 ): Promise<ExecutionResult> => {
   try {
+    // Log the execution attempt
+    console.log(`Executing code in ${language}`, { codeLength: code.length, input });
+    
     if (supabase) {
       try {
         const { data, error } = await supabase.functions.invoke('code-judge', {
@@ -41,6 +44,8 @@ export const executeCode = async (
           };
         }
         
+        console.log("Judge function returned result:", data);
+        
         return {
           output: data.output || "",
           success: !data.error,
@@ -53,6 +58,8 @@ export const executeCode = async (
       }
     }
     
+    // Fallback to local execution if Supabase function fails or is not available
+    console.log("Falling back to local execution");
     return simulateLocalExecution(code, language, input);
   } catch (error) {
     console.error("Execution error:", error);
@@ -73,8 +80,17 @@ export const runTestCases = async (
   problemId?: number,
   userId?: string
 ): Promise<TestResult[]> => {
-  if (problemId && userId) {
+  console.log("Running test cases", { 
+    language,
+    testCasesCount: testCases.length,
+    problemId,
+    hasUserId: !!userId 
+  });
+  
+  if (problemId && userId && supabase) {
     try {
+      console.log("Using Supabase code-judge function for test cases");
+      
       const { data, error } = await supabase.functions.invoke('code-judge', {
         body: {
           code,
@@ -87,12 +103,12 @@ export const runTestCases = async (
       });
       
       if (error) {
-        console.error("Error invoking judge function:", error);
+        console.error("Error invoking judge function for tests:", error);
         throw error;
       }
       
       if (data.error) {
-        console.error("Judge function returned error:", data.error);
+        console.error("Judge function returned error for tests:", data.error);
         return [{
           testCase: { input: "Error", expected_output: "N/A" },
           output: "Error: " + data.error,
@@ -102,6 +118,8 @@ export const runTestCases = async (
           error: data.error
         }];
       }
+      
+      console.log("Judge function returned test results:", data);
       
       if (data.testResults && Array.isArray(data.testResults)) {
         return data.testResults.map((result: any) => ({
@@ -124,25 +142,35 @@ export const runTestCases = async (
     }
   }
   
+  console.log("Using local execution for test cases");
+  
   const results: TestResult[] = [];
   
   for (const testCase of testCases) {
     try {
+      console.log(`Running test case: ${testCase.id || 'unknown'}`);
       const result = await executeCode(code, language, testCase.input);
       
       const normalizedOutput = normalizeOutput(result.output);
       const normalizedExpected = normalizeOutput(testCase.expected_output);
       
+      const passed = normalizedOutput === normalizedExpected;
+      console.log(`Test result: ${passed ? 'PASSED' : 'FAILED'}`, {
+        output: normalizedOutput.substring(0, 100),
+        expected: normalizedExpected.substring(0, 100)
+      });
+      
       results.push({
         testCase,
         output: result.output,
         expected: testCase.expected_output,
-        passed: normalizedOutput === normalizedExpected,
+        passed,
         executionTime: result.executionTime,
         memoryUsed: result.memoryUsed,
         error: result.error
       });
     } catch (error) {
+      console.error(`Error executing test case: ${testCase.id || 'unknown'}`, error);
       results.push({
         testCase,
         output: "Error executing code",

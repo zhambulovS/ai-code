@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Menu, CheckCircle, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, CheckCircle, BookOpen, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -16,6 +16,8 @@ import {
   markLessonAsCompleted,
   fetchCourseProgress
 } from "@/services/coursesService";
+import { checkCourseCompletion, createCourseCompletionAchievement } from "@/services/achievementsService";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -57,10 +59,19 @@ export default function LessonPage() {
     enabled: !!courseId && !!user?.id,
   });
 
+  // Extract YouTube video ID if present in lesson content
+  const extractYouTubeVideoId = (content: string): string | null => {
+    const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = content?.match(youtubeRegex);
+    return match ? match[1] : null;
+  };
+
+  const youtubeVideoId = lesson?.content ? extractYouTubeVideoId(lesson.content) : null;
+
   // Mark lesson as completed
   const { mutate: completeLesson, isPending: isCompletingLesson } = useMutation({
     mutationFn: () => markLessonAsCompleted(courseId || '', lessonId || '', user?.id || ''),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Lesson completed!",
         description: "Your progress has been saved"
@@ -68,6 +79,29 @@ export default function LessonPage() {
       
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['courseProgress', courseId, user?.id] });
+      
+      // Check if course is now complete
+      const isCompleted = await checkCourseCompletion(user?.id || '', courseId || '');
+      
+      if (isCompleted && course) {
+        // Grant achievement for course completion
+        const achievement = await createCourseCompletionAchievement(
+          user?.id || '',
+          courseId || '',
+          course.title
+        );
+        
+        if (achievement) {
+          toast({
+            title: "Achievement Unlocked!",
+            description: achievement.title,
+            variant: "default"
+          });
+          
+          // Invalidate achievements query
+          queryClient.invalidateQueries({ queryKey: ['achievements', user?.id] });
+        }
+      }
       
       // Navigate to next lesson if available
       if (course?.lessons) {
@@ -106,6 +140,14 @@ export default function LessonPage() {
   const progressPercentage = progress && course?.lessons 
     ? Math.round((progress.completedLessons.length / course.lessons.length) * 100)
     : 0;
+
+  // Function to clean lesson content - remove YouTube links if they're displayed separately
+  const cleanLessonContent = (content: string): string => {
+    if (!content || !youtubeVideoId) return content;
+    // Replace YouTube links with a placeholder
+    return content.replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g, 
+      '<em>[Video embedded below]</em>');
+  };
 
   if (isLoading) {
     return (
@@ -254,9 +296,31 @@ export default function LessonPage() {
             
             <h1 className="text-3xl font-bold mb-6">{lesson.title}</h1>
             
-            <div className="prose max-w-none mb-12">
-              <div dangerouslySetInnerHTML={{ __html: lesson.content }} />
+            <div className="prose max-w-none mb-6">
+              <div dangerouslySetInnerHTML={{ __html: cleanLessonContent(lesson.content) }} />
             </div>
+            
+            {youtubeVideoId && (
+              <div className="mb-12">
+                <h3 className="text-lg font-medium mb-4 flex items-center">
+                  <Youtube className="h-5 w-5 text-red-500 mr-2" />
+                  Video Content
+                </h3>
+                <Card>
+                  <CardContent className="p-0 overflow-hidden rounded-lg">
+                    <AspectRatio ratio={16 / 9}>
+                      <iframe
+                        src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                        title="YouTube video player"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                      ></iframe>
+                    </AspectRatio>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
             
             <div className="flex justify-between items-center border-t pt-6">
               <Button
