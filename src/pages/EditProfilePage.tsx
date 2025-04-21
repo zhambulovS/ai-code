@@ -106,31 +106,18 @@ export default function EditProfilePage() {
 
     const file = event.target.files[0];
     const fileExt = file.name.split(".").pop();
-    const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${user.id}/${fileName}`; // Save to a user-specific folder
 
     setUploading(true);
 
     try {
-      // First check if avatars bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      
-      // Create avatars bucket if it doesn't exist
-      if (!buckets || !buckets.find(bucket => bucket.name === 'avatars')) {
-        // We can't create buckets from the frontend due to RLS policies
-        // Instead, we'll try to upload directly and let the backend handle errors
-        toast({
-          title: "Info",
-          description: "Preparing storage for avatar upload...",
-        });
-      }
-
       // Upload file to Storage
       const { data, error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file, {
           cacheControl: "3600",
-          upsert: true
+          upsert: true,
         });
 
       if (uploadError) {
@@ -139,10 +126,10 @@ export default function EditProfilePage() {
 
       // Get the public URL
       const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      
-      if (urlData) {
+
+      if (urlData && urlData.publicUrl) {
         setAvatarUrl(urlData.publicUrl);
-        
+
         // Update profile with new avatar URL
         await updateUserProfile(user.id, {
           avatar_url: urlData.publicUrl,
@@ -152,12 +139,14 @@ export default function EditProfilePage() {
           title: "Avatar Updated",
           description: "Your profile picture has been successfully updated.",
         });
+      } else {
+        throw new Error("Could not get public URL for avatar");
       }
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
       toast({
         title: "Upload Error",
-        description: "An error occurred while uploading the avatar. The storage might not be properly configured.",
+        description: "An error occurred while uploading the avatar. Please make sure the image is less than 2MB and in a supported format (jpg, png, etc).",
         variant: "destructive",
       });
     } finally {
