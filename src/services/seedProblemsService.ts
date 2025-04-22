@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { allProblems } from "@/data/sampleProblems";
+import { allProblems } from "@/data/problems";
 
 // Function to insert a problem and its test cases
 export const insertProblem = async (problemIndex: number) => {
