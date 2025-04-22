@@ -138,6 +138,38 @@ export type Database = {
           },
         ]
       }
+      hint_logs: {
+        Row: {
+          created_at: string
+          generated_hint: string
+          id: string
+          problem_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          generated_hint: string
+          id?: string
+          problem_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          generated_hint?: string
+          id?: string
+          problem_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hint_logs_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           content: string

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Achievement } from "@/services/profileService";
 
@@ -109,7 +108,7 @@ export const checkCourseCompletion = async (
       .from('courses')
       .select('*, lessons(*), tests(*)')
       .eq('id', courseId)
-      .single();
+      .maybeSingle();
     
     if (courseError || !course) {
       console.error("Error fetching course:", courseError);
@@ -122,7 +121,7 @@ export const checkCourseCompletion = async (
       .select('*')
       .eq('user_id', userId)
       .eq('course_id', courseId)
-      .single();
+      .maybeSingle();
     
     if (!progress) {
       return false;
