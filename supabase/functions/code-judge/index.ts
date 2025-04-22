@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
-import { CodeSubmission, ExecutionResult, TestResult } from "./types.ts";
 import { executeCode } from "./execution.ts";
 import { getTestCases, saveSubmission } from "./database.ts";
 
@@ -18,7 +17,7 @@ serve(async (req) => {
 
   try {
     // Get submission data from request
-    const submission: CodeSubmission = await req.json();
+    const submission = await req.json();
     const { code, language, problemId, userId, input, timeLimit, memoryLimit } = submission;
 
     // Validate basic input
@@ -48,7 +47,7 @@ serve(async (req) => {
       );
     }
 
-    // Get test cases from database
+    // Get Supabase credentials from environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     
@@ -71,7 +70,7 @@ serve(async (req) => {
     }
 
     // Execute code on each test case
-    const testResults: TestResult[] = [];
+    const testResults = [];
     let allPassed = true;
     let totalExecutionTime = 0;
     let maxMemoryUsed = 0;
@@ -115,8 +114,8 @@ serve(async (req) => {
       );
     }
 
-    // Return the results
-    const response: ExecutionResult = {
+    // Prepare and return the results
+    const response = {
       status: allPassed ? "accepted" : "wrong_answer",
       executionTime: totalExecutionTime,
       memoryUsed: maxMemoryUsed,
