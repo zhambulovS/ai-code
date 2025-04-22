@@ -57,6 +57,13 @@ export type Database = {
             foreignKeyName: "activity_log_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -115,6 +122,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "favorite_tags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "favorite_tags_user_id_fkey"
             columns: ["user_id"]
@@ -249,6 +263,7 @@ export type Database = {
           language: string
           memory_used: number | null
           problem_id: number
+          score: number | null
           status: string
           updated_at: string | null
           user_id: string
@@ -261,6 +276,7 @@ export type Database = {
           language: string
           memory_used?: number | null
           problem_id: number
+          score?: number | null
           status?: string
           updated_at?: string | null
           user_id: string
@@ -273,6 +289,7 @@ export type Database = {
           language?: string
           memory_used?: number | null
           problem_id?: number
+          score?: number | null
           status?: string
           updated_at?: string | null
           user_id?: string
@@ -454,6 +471,13 @@ export type Database = {
             foreignKeyName: "user_achievements_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -526,7 +550,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_view: {
+        Row: {
+          avatar_url: string | null
+          country: string | null
+          institution: string | null
+          last_submission_at: string | null
+          level: string | null
+          problems_solved: number | null
+          rank: number | null
+          total_score: number | null
+          total_submissions: number | null
+          user_id: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

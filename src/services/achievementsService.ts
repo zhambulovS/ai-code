@@ -129,15 +129,15 @@ export const checkCourseCompletion = async (
     }
 
     // Check if all lessons are completed
-    const allLessonsCompleted = course.lessons.length > 0 && 
+    const allLessonsCompleted = course.lessons && course.lessons.length > 0 && 
       course.lessons.every((lesson: any) => 
-        progress.completed_lessons.includes(lesson.id)
+        progress.completed_lessons?.includes(lesson.id)
       );
     
     // Check if all required tests are completed
-    const allRequiredTestsCompleted = course.tests.length === 0 || 
+    const allRequiredTestsCompleted = !course.tests || course.tests.length === 0 || 
       course.tests.every((test: any) => 
-        progress.completed_tests.includes(test.id)
+        progress.completed_tests?.includes(test.id)
       );
     
     return allLessonsCompleted && allRequiredTestsCompleted;

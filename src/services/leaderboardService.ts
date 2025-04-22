@@ -15,14 +15,13 @@ export const fetchLeaderboard = async (
   searchTerm: string = ""
 ): Promise<{ data: LeaderboardEntry[], total: number }> => {
   try {
-    // First get the profiles
     let query = supabase
-      .from('profiles')
+      .from('leaderboard_view')
       .select('*', { count: 'exact' });
     
     // Add search filtering if provided
     if (searchTerm) {
-      query = query.or(`full_name.ilike.%${searchTerm}%`);
+      query = query.ilike('username', `%${searchTerm}%`);
     }
     
     // Add region filtering if provided
@@ -32,43 +31,31 @@ export const fetchLeaderboard = async (
     
     // Add pagination
     query = query
-      .order('rank', { ascending: true })
+      .order('problems_solved', { ascending: false })
+      .order('total_score', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
     
-    const { data: profiles, count, error } = await query;
+    const { data: leaderboardData, count, error } = await query;
     
     if (error) throw error;
-    if (!profiles) return { data: [], total: 0 };
+    if (!leaderboardData) return { data: [], total: 0 };
     
-    // Get the solved problems count for each user
-    // In a real app, this would use the timeRange parameter to filter by date
-    const userIds = profiles.map(profile => profile.id);
-    const { data: submissions, error: subError } = await supabase
-      .from('submissions')
-      .select('user_id, problem_id')
-      .in('user_id', userIds)
-      .eq('status', 'accepted');
-    
-    if (subError) throw subError;
-    
-    // Count unique problems solved per user
-    const problemsSolved: Record<string, Set<string>> = {};
-    submissions?.forEach(submission => {
-      if (!problemsSolved[submission.user_id]) {
-        problemsSolved[submission.user_id] = new Set();
-      }
-      problemsSolved[submission.user_id].add(submission.problem_id.toString());
-    });
-    
-    // Combine the data
-    const leaderboardData: LeaderboardEntry[] = profiles.map(profile => ({
-      ...profile,
-      problems_solved: problemsSolved[profile.id]?.size || 0,
-      change: Math.floor(Math.random() * 5) - 2, // Simulated change for demo
+    // Map the data to match our LeaderboardEntry interface
+    const entries: LeaderboardEntry[] = leaderboardData.map(entry => ({
+      id: entry.user_id,
+      full_name: entry.username,
+      avatar_url: entry.avatar_url,
+      level: entry.level,
+      rank: entry.rank,
+      institution: entry.institution,
+      country: entry.country,
+      bio: null,
+      problems_solved: entry.problems_solved || 0,
+      change: Math.floor(Math.random() * 5) - 2 // Simulated rank change for demo
     }));
     
     return { 
-      data: leaderboardData, 
+      data: entries, 
       total: count || 0 
     };
   } catch (error) {
