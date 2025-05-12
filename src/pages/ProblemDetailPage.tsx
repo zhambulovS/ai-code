@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -17,40 +16,9 @@ import { CodeEditor } from "@/components/problem-detail/CodeEditor";
 import { TestResults } from "@/components/problem-detail/TestResults";
 import { SubmissionsTable } from "@/components/problem-detail/SubmissionsTable";
 import { runTestCases } from "@/services/codeExecutionService";
-
-const codeTemplates = {
-  javascript: `/**
- * @param {number[]} nums
- * @param {number} target
- * @return {number[]}
- */
-function twoSum(nums, target) {
-  // Ваше решение здесь
-}`,
-  python: `class Solution:
-    def twoSum(self, nums: List[int], target: int) -> List[int]:
-        # Ваше решение здесь
-        pass`,
-  java: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        // Ваше решение здесь
-        return new int[]{0, 0};
-    }
-}`,
-  cpp: `class Solution {
-public:
-    vector<int> twoSum(vector<int>& nums, int target) {
-        // Ваше решение здесь
-        return {0, 0};
-    }
-};`,
-  csharp: `public class Solution {
-    public int[] TwoSum(int[] nums, int target) {
-        // Ваше решение здесь
-        return new int[]{0, 0};
-    }
-}`
-};
+import { ProblemDescription } from "@/components/problem-detail/ProblemDescription";
+import { CodeEditorToolbar } from "@/components/problem-detail/CodeEditorToolbar";
+import codeTemplates from "@/components/problem-detail/codeTemplates";
 
 const ProblemDetailPage = () => {
   const { id } = useParams();
@@ -233,53 +201,37 @@ const ProblemDetailPage = () => {
           </TabsList>
           
           <TabsContent value="problem" className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: problem.description }} />
-                  
-                  {testCases && testCases.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Примеры:</h3>
-                      
-                      {testCases.filter(tc => tc.is_sample).map((example, index) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-md">
-                          <div className="space-y-2">
-                            <div>
-                              <span className="font-medium">Вход:</span> {example.input.replace(/\n/g, ', ')}
-                            </div>
-                            <div>
-                              <span className="font-medium">Ожидаемый выход:</span> {example.expected_output}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold">Ограничения:</h3>
-                    <ul className="list-disc pl-5 mt-2 space-y-1">
-                      <li>Ограничение по времени: {problem.time_limit} мс</li>
-                      <li>Ограничение по памяти: {problem.memory_limit / 1024} МБ</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <CodeEditor 
-              code={code}
-              language={language}
-              isRunning={isRunning}
-              isSubmitting={isSubmitting}
-              testResults={testResults}
-              onCodeChange={setCode}
-              onLanguageChange={setLanguage}
-              onReset={() => setCode(codeTemplates[language as keyof typeof codeTemplates] || "")}
-              onRun={handleRunCode}
-              onSubmit={handleSubmit}
+            <ProblemDescription 
+              description={problem.description}
+              testCases={testCases || []}
+              timeLimit={problem.time_limit}
+              memoryLimit={problem.memory_limit}
             />
+            
+            <div className="space-y-4">
+              <CodeEditorToolbar
+                language={language}
+                onLanguageChange={setLanguage}
+                onReset={() => setCode(codeTemplates[language as keyof typeof codeTemplates] || "")}
+                problemId={problemId}
+                code={code}
+                testResults={testResults}
+                isLoggedIn={!!user}
+              />
+              
+              <CodeEditor 
+                code={code}
+                language={language}
+                isRunning={isRunning}
+                isSubmitting={isSubmitting}
+                testResults={testResults}
+                onCodeChange={setCode}
+                onLanguageChange={setLanguage}
+                onReset={() => setCode(codeTemplates[language as keyof typeof codeTemplates] || "")}
+                onRun={handleRunCode}
+                onSubmit={handleSubmit}
+              />
+            </div>
             
             <TestResults 
               results={testResults} 
