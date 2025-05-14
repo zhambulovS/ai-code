@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Flag } from "lucide-react";
 
 export const LanguageSelector = () => {
   const { i18n } = useTranslation();
@@ -23,9 +24,10 @@ export const LanguageSelector = () => {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="w-16"
+      className="w-16 flex items-center justify-center gap-1"
     >
-      {currentLanguage === 'en' ? 'KK' : 'EN'}
+      <Flag className="h-4 w-4" />
+      {currentLanguage === 'en' ? 'EN' : 'KK'}
     </Button>
   );
 };
