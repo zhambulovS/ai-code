@@ -4,6 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ActivityLog } from "@/services/profileService";
+import { useTranslation } from "react-i18next";
 
 interface ActivityCalendarProps {
   activityLog: ActivityLog[];
@@ -11,6 +12,7 @@ interface ActivityCalendarProps {
 
 export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const { t } = useTranslation();
   
   // Transform activity data for the calendar
   const activityMap = new Map<string, number>();
@@ -37,7 +39,7 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
   return (
     <Card className="col-span-1 md:col-span-2">
       <CardHeader>
-        <CardTitle>Activity Calendar</CardTitle>
+        <CardTitle>{t('profile.activityCalendar')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-4">
@@ -77,19 +79,19 @@ export function ActivityCalendar({ activityLog }: ActivityCalendarProps) {
           <div className="flex justify-center space-x-2 text-sm">
             <div className="flex items-center">
               <div className="mr-1 h-3 w-3 rounded bg-gray-100"></div>
-              <span>No activity</span>
+              <span>{t('profile.noActivity')}</span>
             </div>
             <div className="flex items-center">
               <div className="mr-1 h-3 w-3 rounded bg-green-100"></div>
-              <span>1 problem</span>
+              <span>1 {t('profile.problem')}</span>
             </div>
             <div className="flex items-center">
               <div className="mr-1 h-3 w-3 rounded bg-green-300"></div>
-              <span>2-3 problems</span>
+              <span>2-3 {t('profile.problems')}</span>
             </div>
             <div className="flex items-center">
               <div className="mr-1 h-3 w-3 rounded bg-green-500"></div>
-              <span>4+ problems</span>
+              <span>4+ {t('profile.problems')}</span>
             </div>
           </div>
         </div>

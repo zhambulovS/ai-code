@@ -1,0 +1,42 @@
+
+{
+  "navigation": {
+    "home": "Басты бет",
+    "problems": "Есептер",
+    "courses": "Курстар",
+    "leaderboard": "Рейтинг",
+    "profile": "Менің профилім",
+    "login": "Кіру",
+    "register": "Тіркелу",
+    "logout": "Шығу"
+  },
+  "footer": {
+    "resources": "Ресурстар",
+    "problemCatalog": "Есептер каталогы",
+    "tutorials": "Оқулықтар",
+    "learningPath": "Оқу жолы",
+    "community": "Қауымдастық",
+    "discussions": "Талқылау форумы",
+    "events": "Алдағы іс-шаралар",
+    "follow": "Бізге қосылыңыз",
+    "rights": "Барлық құқықтар қорғалған"
+  },
+  "profile": {
+    "overview": "Шолу",
+    "activity": "Белсенділік",
+    "learning": "Оқу",
+    "editProfile": "Профильді өңдеу",
+    "problemsSolved": "Шешілген есептер",
+    "totalProblems": "Барлық шешілген есептер",
+    "achievements": "Жетістіктер",
+    "favoriteTags": "Таңдаулы тегтер",
+    "activityCalendar": "Белсенділік күнтізбесі",
+    "noActivity": "Белсенділік жоқ",
+    "problem": "есеп",
+    "problems": "есеп",
+    "recommendedCourses": "Ұсынылған курстар",
+    "coursesDescription": "Сіздің есеп шешу үлгілері мен жақсарту салаларына негізделген",
+    "rank": "Рейтинг",
+    "level": "Деңгей"
+  }
+}

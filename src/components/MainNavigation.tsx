@@ -5,12 +5,15 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "./LanguageSelector";
 
 export default function MainNavigation() {
   const location = useLocation();
   const { user, loading, logout } = useAuth();
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -22,10 +25,10 @@ export default function MainNavigation() {
   }, [location.pathname]);
 
   const navItems = [
-    { path: "/", label: "Home" },
-    { path: "/problems", label: "Problems" },
-    { path: "/courses", label: "Courses" },
-    { path: "/leaderboard", label: "Leaderboard" },
+    { path: "/", label: t('navigation.home') },
+    { path: "/problems", label: t('navigation.problems') },
+    { path: "/courses", label: t('navigation.courses') },
+    { path: "/leaderboard", label: t('navigation.leaderboard') },
   ];
 
   return (
@@ -65,29 +68,31 @@ export default function MainNavigation() {
           </Button>
         </div>
 
-        {/* Auth Buttons (Desktop) */}
+        {/* Auth Buttons and Language Selector (Desktop) */}
         <div className="hidden md:flex items-center gap-2">
+          <LanguageSelector />
+          
           {!loading && user ? (
             <>
               <Link to="/profile">
                 <Button variant="outline" size="sm">
-                  My Profile
+                  {t('navigation.profile')}
                 </Button>
               </Link>
               <Button variant="ghost" size="sm" onClick={logout}>
-                Logout
+                {t('navigation.logout')}
               </Button>
             </>
           ) : (
             <>
               <Link to="/login">
                 <Button variant="ghost" size="sm">
-                  Login
+                  {t('navigation.login')}
                 </Button>
               </Link>
               <Link to="/register">
                 <Button variant="default" size="sm">
-                  Register
+                  {t('navigation.register')}
                 </Button>
               </Link>
             </>
@@ -113,27 +118,31 @@ export default function MainNavigation() {
               ))}
             </nav>
             <div className="border-t border-border mt-2 pt-3 flex flex-col gap-2">
+              <div className="flex justify-center mb-2">
+                <LanguageSelector />
+              </div>
+              
               {!loading && user ? (
                 <>
                   <Link to="/profile" className="w-full">
                     <Button variant="outline" size="sm" className="w-full">
-                      My Profile
+                      {t('navigation.profile')}
                     </Button>
                   </Link>
                   <Button variant="ghost" size="sm" onClick={logout} className="w-full">
-                    Logout
+                    {t('navigation.logout')}
                   </Button>
                 </>
               ) : (
                 <>
                   <Link to="/login" className="w-full">
                     <Button variant="ghost" size="sm" className="w-full">
-                      Login
+                      {t('navigation.login')}
                     </Button>
                   </Link>
                   <Link to="/register" className="w-full">
                     <Button variant="default" size="sm" className="w-full">
-                      Register
+                      {t('navigation.register')}
                     </Button>
                   </Link>
                 </>

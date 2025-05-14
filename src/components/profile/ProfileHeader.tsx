@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { UserProfile } from "@/services/profileService";
+import { useTranslation } from "react-i18next";
 
 interface ProfileHeaderProps {
   profile: UserProfile;
@@ -10,6 +11,8 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="mb-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -26,7 +29,7 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
             <div className="flex items-center space-x-2 text-gray-600">
               <span>{profile.level}</span>
               <span className="text-gray-300">•</span>
-              <span>Rank #{profile.rank}</span>
+              <span>{t('profile.rank')} #{profile.rank}</span>
               {profile.institution && (
                 <>
                   <span className="text-gray-300">•</span>
@@ -42,7 +45,7 @@ export function ProfileHeader({ profile, onEditProfile }: ProfileHeaderProps) {
         
         <Button variant="outline" onClick={onEditProfile}>
           <Settings className="h-4 w-4 mr-2" />
-          Edit Profile
+          {t('profile.editProfile')}
         </Button>
       </div>
     </div>

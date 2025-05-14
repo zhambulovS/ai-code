@@ -9,6 +9,7 @@ import { FavoriteTagsCard } from "./FavoriteTagsCard";
 import { ActivityCalendar } from "./ActivityCalendar";
 import { TagStatsChart } from "./TagStatsChart";
 import { CourseRecommendations } from "./CourseRecommendations";
+import { useTranslation } from "react-i18next";
 
 interface ProfileTabsProps {
   activeTab: string;
@@ -29,12 +30,14 @@ export function ProfileTabs({
   tagStats,
   recommendedCourses,
 }: ProfileTabsProps) {
+  const { t } = useTranslation();
+  
   return (
     <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mb-8">
       <TabsList className="grid grid-cols-3 w-full md:w-[400px]">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="activity">Activity</TabsTrigger>
-        <TabsTrigger value="learning">Learning</TabsTrigger>
+        <TabsTrigger value="overview">{t('profile.overview')}</TabsTrigger>
+        <TabsTrigger value="activity">{t('profile.activity')}</TabsTrigger>
+        <TabsTrigger value="learning">{t('profile.learning')}</TabsTrigger>
       </TabsList>
       
       <TabsContent value="overview" className="space-y-6 mt-6">

@@ -4,18 +4,21 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Star, ArrowRight } from "lucide-react";
 import { Course } from "@/services/recommendationService";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface CourseRecommendationsProps {
   courses: Course[];
 }
 
 export function CourseRecommendations({ courses }: CourseRecommendationsProps) {
+  const { t } = useTranslation();
+  
   return (
     <Card className="col-span-1 md:col-span-3">
       <CardHeader>
-        <CardTitle>Recommended Courses</CardTitle>
+        <CardTitle>{t('profile.recommendedCourses')}</CardTitle>
         <CardDescription>
-          Based on your problem-solving patterns and areas for improvement
+          {t('profile.coursesDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>

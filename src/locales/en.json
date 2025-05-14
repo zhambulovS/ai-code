@@ -1,0 +1,42 @@
+
+{
+  "navigation": {
+    "home": "Home",
+    "problems": "Problems",
+    "courses": "Courses",
+    "leaderboard": "Leaderboard",
+    "profile": "My Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "footer": {
+    "resources": "Resources",
+    "problemCatalog": "Problem Catalog",
+    "tutorials": "Tutorials",
+    "learningPath": "Learning Path",
+    "community": "Community",
+    "discussions": "Discussion Forum",
+    "events": "Upcoming Events",
+    "follow": "Follow Us",
+    "rights": "All rights reserved"
+  },
+  "profile": {
+    "overview": "Overview",
+    "activity": "Activity",
+    "learning": "Learning",
+    "editProfile": "Edit Profile",
+    "problemsSolved": "Problems Solved",
+    "totalProblems": "Total problems completed",
+    "achievements": "Achievements",
+    "favoriteTags": "Favorite Tags",
+    "activityCalendar": "Activity Calendar",
+    "noActivity": "No activity",
+    "problem": "problem",
+    "problems": "problems",
+    "recommendedCourses": "Recommended Courses",
+    "coursesDescription": "Based on your problem-solving patterns and areas for improvement",
+    "rank": "Rank",
+    "level": "Level"
+  }
+}
