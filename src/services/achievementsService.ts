@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Achievement } from "@/services/profileService";
 
@@ -135,9 +136,9 @@ export const checkCourseCompletion = async (
     
     // Check if all required tests are completed
     const allRequiredTestsCompleted = !course.tests || course.tests.length === 0 || 
-      course.tests.every((test: any) => 
+      (Array.isArray(course.tests) && course.tests.every((test: any) => 
         progress.completed_tests?.includes(test.id)
-      );
+      ));
     
     return allLessonsCompleted && allRequiredTestsCompleted;
   } catch (error) {
