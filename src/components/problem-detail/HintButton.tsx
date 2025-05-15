@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Lightbulb } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Lightbulb, RotateCw, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog,
@@ -8,10 +8,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { generateHint, getHintHistory, type HintRequest } from "@/services/hintService";
+import { 
+  generateHint, 
+  getHintHistory, 
+  getPersonalizedHint,
+  type HintRequest 
+} from "@/services/hintService";
+import { useTranslation } from "react-i18next";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface HintButtonProps {
   problemId: number;
@@ -19,20 +27,47 @@ interface HintButtonProps {
   language: string;
   testResults: any[];
   isLoggedIn: boolean;
+  problemDifficulty?: string;
 }
 
-export function HintButton({ problemId, code, language, testResults, isLoggedIn }: HintButtonProps) {
+export function HintButton({ 
+  problemId, 
+  code, 
+  language, 
+  testResults, 
+  isLoggedIn,
+  problemDifficulty = "medium" 
+}: HintButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const [hintHistory, setHintHistory] = useState<any[]>([]);
+  const [personalizedHint, setPersonalizedHint] = useState<string | null>(null);
+  const [isLoadingPersonalized, setIsLoadingPersonalized] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
+
+  // Загружаем историю подсказок при открытии диалога
+  useEffect(() => {
+    if (isOpen && isLoggedIn && !hintHistory.length) {
+      loadHintHistory();
+    }
+  }, [isOpen, isLoggedIn]);
+
+  const loadHintHistory = async () => {
+    try {
+      const history = await getHintHistory(problemId);
+      setHintHistory(history);
+    } catch (error) {
+      console.error("Error loading hint history:", error);
+    }
+  };
 
   const handleGetHint = async () => {
     if (!isLoggedIn) {
       toast({
-        title: "Необходимо войти в систему",
-        description: "Чтобы получить подсказку, необходимо войти в систему.",
+        title: t("problem.loginRequired"),
+        description: t("problem.loginToGetHint"),
         variant: "destructive"
       });
       return;
@@ -40,8 +75,8 @@ export function HintButton({ problemId, code, language, testResults, isLoggedIn 
 
     if (!testResults.length || testResults.every(r => r.passed)) {
       toast({
-        title: "Нет доступных подсказок",
-        description: "Для получения подсказки необходимо выполнить тесты с ошибками.",
+        title: t("problem.noHintsAvailable"),
+        description: t("problem.runFailedTestsForHint"),
         variant: "destructive"
       });
       return;
@@ -63,7 +98,7 @@ export function HintButton({ problemId, code, language, testResults, isLoggedIn 
       // Create the hint request
       const failedTest = testResults.find(r => !r.passed);
       if (!failedTest) {
-        throw new Error("Не удалось найти непройденный тест");
+        throw new Error(t("problem.noFailedTests"));
       }
 
       const hintRequest: HintRequest = {
@@ -82,15 +117,38 @@ export function HintButton({ problemId, code, language, testResults, isLoggedIn 
       
       // Open the dialog
       setIsOpen(true);
+
+      // Try to get a personalized hint based on user's experience
+      await handleGetPersonalizedHint();
+      
     } catch (error) {
       console.error("Error getting hint:", error);
       toast({
-        title: "Ошибка",
-        description: error instanceof Error ? error.message : "Произошла ошибка при получении подсказки",
+        title: t("common.error"),
+        description: error instanceof Error ? error.message : t("problem.errorGettingHint"),
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGetPersonalizedHint = async () => {
+    if (!isLoggedIn) return;
+    
+    setIsLoadingPersonalized(true);
+    try {
+      const personalHint = await getPersonalizedHint(
+        "current-user-id", // В идеале, это должен быть реальный ID пользователя
+        problemId,
+        problemDifficulty,
+        hintHistory.length
+      );
+      setPersonalizedHint(personalHint);
+    } catch (error) {
+      console.error("Error getting personalized hint:", error);
+    } finally {
+      setIsLoadingPersonalized(false);
     }
   };
 
@@ -107,30 +165,42 @@ export function HintButton({ problemId, code, language, testResults, isLoggedIn 
         ) : (
           <Lightbulb size={16} className="mr-1" />
         )}
-        Получить подсказку
+        {t("problem.getHint")}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Подсказка</DialogTitle>
+            <DialogTitle>{t("problem.hint")}</DialogTitle>
             <DialogDescription>
               {hintHistory.length >= 3 ? (
                 <div className="text-amber-600">
-                  Вы достигли лимита подсказок для этой задачи (3 в 24 часа).
+                  {t("problem.hintLimitReached")}
                 </div>
               ) : (
                 <div>
-                  Использовано {hintHistory.length}/3 подсказок за последние 24 часа.
+                  {t("problem.hintsUsed", { count: hintHistory.length, max: 3 })}
                 </div>
               )}
             </DialogDescription>
           </DialogHeader>
           
+          {personalizedHint && (
+            <Card className="border-primary/20 bg-primary/5 mb-4">
+              <CardContent className="p-4">
+                <div className="flex items-center mb-2">
+                  <BookOpen className="h-4 w-4 text-primary mr-2" />
+                  <h4 className="text-sm font-medium">{t("problem.personalizedAdvice")}</h4>
+                </div>
+                <p className="text-sm">{personalizedHint}</p>
+              </CardContent>
+            </Card>
+          )}
+          
           <div className="mt-4 space-y-4">
             {hintHistory.map((h, i) => (
-              <div key={i} className="p-3 bg-gray-50 rounded-md">
-                <div className="text-xs text-gray-500 mb-1">
+              <div key={i} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                   {new Date(h.created_at).toLocaleString()}:
                 </div>
                 <div className="whitespace-pre-wrap">{h.generated_hint}</div>
@@ -138,21 +208,43 @@ export function HintButton({ problemId, code, language, testResults, isLoggedIn 
             ))}
             
             {hint && hintHistory.length === 0 && (
-              <div className="p-3 bg-gray-50 rounded-md whitespace-pre-wrap">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md whitespace-pre-wrap">
                 {hint}
               </div>
             )}
             
             {hintHistory.length === 0 && !hint && (
-              <div className="p-3 bg-gray-50 rounded-md">
-                Загрузка подсказки...
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                {t("common.loading")}...
               </div>
             )}
           </div>
           
+          {isLoadingPersonalized && (
+            <div className="flex justify-center my-4">
+              <RotateCw className="h-4 w-4 animate-spin text-primary" />
+            </div>
+          )}
+          
+          {hintHistory.length < 3 && !isLoading && (
+            <Button 
+              variant="outline" 
+              className="w-full mt-2" 
+              onClick={handleGetPersonalizedHint}
+              disabled={isLoadingPersonalized}
+            >
+              {isLoadingPersonalized ? (
+                <RotateCw className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Lightbulb className="h-4 w-4 mr-2" />
+              )}
+              {t("problem.getPersonalizedAdvice")}
+            </Button>
+          )}
+          
           <DialogFooter>
             <Button onClick={() => setIsOpen(false)}>
-              Закрыть
+              {t("common.close")}
             </Button>
           </DialogFooter>
         </DialogContent>
