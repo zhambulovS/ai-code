@@ -10,7 +10,7 @@ import {
   BookMarked,
   TrendingUp
 } from "lucide-react";
-import { AIRecommendation } from "@/services/recommendationService";
+import { AIRecommendation } from "@/services/recommendations";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "react-i18next";

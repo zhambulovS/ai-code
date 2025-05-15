@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Star, ArrowRight } from "lucide-react";
-import { Course } from "@/services/recommendationService";
+import { Course } from "@/services/recommendations";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 

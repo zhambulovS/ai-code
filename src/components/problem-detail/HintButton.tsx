@@ -15,9 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   generateHint, 
   getHintHistory, 
-  getPersonalizedHint,
   type HintRequest 
 } from "@/services/hintService";
+import { getPersonalizedHint } from "@/services/recommendations";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 

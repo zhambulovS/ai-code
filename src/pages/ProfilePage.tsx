@@ -16,7 +16,7 @@ import {
   getRecommendedCourses,
   getUserTagStats,
   getAIRecommendations,
-} from "@/services/recommendationService";
+} from "@/services/recommendations";
 
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { AIRecommendationAlert } from "@/components/profile/AIRecommendationAlert";
