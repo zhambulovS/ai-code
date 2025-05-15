@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Course {
@@ -7,7 +6,7 @@ export interface Course {
   description: string;
   difficulty: string;
   tags: string[];
-  rating: number;
+  rating?: number; // Make rating optional
 }
 
 export interface TagStats {
@@ -79,7 +78,7 @@ export const getRecommendedCourses = async (userId: string): Promise<Course[]> =
       description: course.description,
       difficulty: course.difficulty,
       tags: course.tags || [],
-      rating: course.rating || 4.5
+      rating: 4.5 // Add default rating since it doesn't exist in the database
     }));
   } catch (error) {
     console.error('Error getting recommended courses:', error);
@@ -196,17 +195,34 @@ const getUserSubmissions = async (userId: string) => {
   return data || [];
 };
 
+// Fixed function to correctly query course progress
 const getUserCourseProgress = async (userId: string) => {
+  // Get user progress records
   const { data } = await supabase
-    .from('course_progress')
+    .from('user_progress')
     .select('*, courses(title)')
     .eq('user_id', userId);
     
-  return (data || []).map(item => ({
-    id: item.course_id,
-    title: item.courses?.title || "Неизвестный курс",
-    progress: item.progress || 0
-  }));
+  if (!data || data.length === 0) {
+    return [];
+  }
+  
+  // Process the data to return a consistent format
+  return data.map(item => {
+    // Calculate progress percentage based on completed lessons
+    const completedLessons = item.completed_lessons || [];
+    const totalLessons = 10; // Default value, ideally we would get this from the database
+    const progressPercentage = Math.min(
+      Math.round((completedLessons.length / totalLessons) * 100), 
+      100
+    );
+    
+    return {
+      id: item.course_id,
+      title: item.courses?.title || "Неизвестный курс",
+      progress: progressPercentage
+    };
+  });
 };
 
 // Новый метод для получения персонализированных подсказок по текущей задаче
@@ -237,5 +253,68 @@ export const getPersonalizedHint = async (
   } catch (error) {
     console.error('Error getting personalized hint:', error);
     return "Произошла ошибка при получении подсказки.";
+  }
+};
+
+// Получение рекомендаций для обучения пользователя
+export const getLearningRecommendations = async (userId: string): Promise<Course[]> => {
+  try {
+    // Получаем статистику по тегам пользователя
+    const tagStats = await getUserTagStats(userId);
+    
+    // В настоящей реализации здесь был бы запрос к ИИ-модели для рекомендаций
+    // на основе статистики пользователя
+    
+    // Получаем все доступные курсы
+    const { data: allCourses, error } = await supabase
+      .from('courses')
+      .select('*');
+      
+    if (error) throw error;
+    
+    if (!allCourses || allCourses.length === 0) {
+      // Если курсы не найдены, возвращаем примеры курсов
+      return [
+        {
+          id: "1",
+          title: "Динамическое программирование",
+          description: "Изучите продвинутые техники для эффективного решения задач DP",
+          difficulty: "Advanced",
+          tags: ["Dynamic Programming", "Algorithms"],
+          rating: 4.8
+        },
+        {
+          id: "2",
+          title: "Основы теории графов",
+          description: "Важные концепции теории графов с практическими применениями",
+          difficulty: "Intermediate",
+          tags: ["Graphs", "BFS", "DFS"],
+          rating: 4.6
+        },
+        {
+          id: "3",
+          title: "Структуры данных: глубокое погружение",
+          description: "Углубленное изучение продвинутых структур данных",
+          difficulty: "Intermediate",
+          tags: ["Data Structures", "Trees", "Heaps"],
+          rating: 4.7
+        }
+      ];
+    }
+    
+    // Сопоставляем теги пользователя с курсами для получения персонализированных рекомендаций
+    // В настоящей реализации здесь был бы более сложный алгоритм рекомендаций
+    
+    return allCourses.map(course => ({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      difficulty: course.difficulty,
+      tags: course.tags || [],
+      rating: 4.5 // Add default rating since it doesn't exist in the database
+    }));
+  } catch (error) {
+    console.error('Error getting learning recommendations:', error);
+    return [];
   }
 };
