@@ -9,6 +9,7 @@ import { getLearningRecommendations } from "@/services/recommendations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
+import { Course } from "@/services/recommendations/types";
 
 interface CodeEditorToolbarProps {
   language: string;
@@ -32,13 +33,13 @@ export function CodeEditorToolbar({
   problemDifficulty = "medium"
 }: CodeEditorToolbarProps) {
   const { t } = useTranslation();
-  const [recommendations, setRecommendations] = useState<string[]>([]);
+  const [recommendations, setRecommendations] = useState<Course[]>([]);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
 
   const loadRecommendations = async () => {
     setIsLoadingRecs(true);
     try {
-      const recs = await getLearningRecommendations(problemId);
+      const recs = await getLearningRecommendations(problemId.toString());
       setRecommendations(recs);
     } catch (error) {
       console.error("Error loading recommendations:", error);
@@ -110,7 +111,15 @@ export function CodeEditorToolbar({
                     <CardContent>
                       <ul className="list-disc pl-5 space-y-2">
                         {recommendations.map((rec, index) => (
-                          <li key={index}>{rec}</li>
+                          <li key={index}>
+                            <div className="font-medium">{rec.title}</div>
+                            <div className="text-sm text-gray-600">{rec.description}</div>
+                            {rec.tags && rec.tags.length > 0 && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                {rec.tags.join(', ')}
+                              </div>
+                            )}
+                          </li>
                         ))}
                       </ul>
                     </CardContent>

@@ -67,13 +67,10 @@ export const getRecommendedCourses = async (userId: string): Promise<Course[]> =
 };
 
 // Get learning recommendations for the user
-export const getLearningRecommendations = async (userId: string): Promise<Course[]> => {
+export const getLearningRecommendations = async (problemId: string): Promise<Course[]> => {
   try {
-    // Get user's tag statistics
-    const tagStats = await getUserTagStats(userId);
-    
-    // In a real implementation, this would use an AI model for recommendations
-    // based on user statistics
+    // In a real implementation, this would use an AI model to recommend
+    // courses based on the problem the user is attempting
     
     // Get all available courses
     const { data: allCourses, error } = await supabase
@@ -112,8 +109,7 @@ export const getLearningRecommendations = async (userId: string): Promise<Course
       ];
     }
     
-    // Match user tags with courses for personalized recommendations
-    // In a real implementation, this would be a more complex recommendation algorithm
+    // In a real implementation, we would filter courses based on problem type/difficulty
     
     return allCourses.map(course => ({
       id: course.id,
