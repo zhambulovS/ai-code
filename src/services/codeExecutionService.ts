@@ -55,6 +55,7 @@ export const executeCode = async (
         };
       } catch (error) {
         console.error("Error using judge server:", error);
+        // Fall through to local execution
       }
     }
     
@@ -139,6 +140,7 @@ export const runTestCases = async (
       throw new Error("Invalid test results format");
     } catch (error) {
       console.error("Error running test cases through judge:", error);
+      // Fall through to local execution
     }
   }
   

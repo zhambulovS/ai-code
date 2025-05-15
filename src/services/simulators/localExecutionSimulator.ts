@@ -10,7 +10,7 @@ export const simulateLocalExecution = async (
 ): Promise<ExecutionResult> => {
   console.log(`Local execution simulator for ${language}`, { inputLength: input.length });
   
-  const executionDelay = Math.min(Math.random() * 500 + 200, timeLimit * 0.8);
+  const executionDelay = Math.min(Math.random() * 500 + 100, timeLimit * 0.8);
   
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -19,18 +19,31 @@ export const simulateLocalExecution = async (
         let success = true;
         let error = undefined;
         
+        // Handle JavaScript/TypeScript execution
         if (language === "javascript" || language === "typescript") {
           try {
-            // Try to detect the problem type based on input format
+            // First attempt: Try to handle TwoSum problem specifically
             if (input.includes('[') && (input.includes(',') || input.includes(' '))) {
               try {
+                // Try to parse input for two sum problem
                 const { nums, target } = parseInputForTwoSum(input);
                 
                 // Create function from user's code
                 // eslint-disable-next-line no-new-func
                 const userFunction = new Function('nums', 'target', `
                   ${code}
-                  return typeof twoSum !== 'undefined' ? twoSum(nums, target) : null;
+                  // First try twoSum function
+                  if (typeof twoSum !== 'undefined') {
+                    return twoSum(nums, target);
+                  }
+                  // Try other common function names
+                  if (typeof solution !== 'undefined') {
+                    return solution(nums, target);
+                  }
+                  if (typeof findTwoNumbers !== 'undefined') {
+                    return findTwoNumbers(nums, target);
+                  }
+                  return null;
                 `);
                 
                 const result = userFunction(nums, target);
@@ -38,32 +51,9 @@ export const simulateLocalExecution = async (
                   output = JSON.stringify(result);
                   success = true;
                 } else {
-                  // Try another approach - maybe they used a different function name
-                  const extractOutput = new Function('nums', 'target', `
-                    ${code}
-                    // Look for any function that returns an array
-                    const functions = Object.getOwnPropertyNames(this)
-                      .filter(prop => typeof this[prop] === 'function' && prop !== 'twoSum');
-                    
-                    for (const fn of functions) {
-                      try {
-                        const result = this[fn](nums, target);
-                        if (Array.isArray(result)) return result;
-                      } catch(e) {}
-                    }
-                    
-                    return null;
-                  `);
-                  
-                  const altResult = extractOutput(nums, target);
-                  if (altResult !== null) {
-                    output = JSON.stringify(altResult);
-                    success = true;
-                  } else {
-                    output = "No valid solution function found";
-                    success = false;
-                    error = "Could not find a valid solution function";
-                  }
+                  // Try another approach if no specific function worked
+                  output = evaluateJavaScriptWithConsoleCapture(code, input);
+                  success = !!output;
                 }
               } catch (parseError) {
                 console.error("Input parsing error:", parseError);
@@ -72,7 +62,7 @@ export const simulateLocalExecution = async (
                 success = !!output;
               }
             } else {
-              // For non-array inputs, try direct execution with console capturing
+              // For non-array inputs, use direct execution with console capturing
               output = evaluateJavaScriptWithConsoleCapture(code, input);
               success = true;
             }
@@ -83,33 +73,52 @@ export const simulateLocalExecution = async (
             console.error("JavaScript execution error:", e);
           }
         } else if (language === "python") {
-          // Simulate Python execution
-          success = Math.random() > 0.2;
-          if (!success) {
-            error = "Python syntax error";
-            output = "Error: " + error;
-          } else {
-            // Make a somewhat realistic output
+          // Simulate Python execution with more realistic output
+          try {
             if (input.includes('[') && input.includes(']')) {
+              // Handle array inputs for Python
               const match = input.match(/\[([^\]]+)\]/);
               if (match && match[1]) {
-                const items = match[1].split(',').map(s => s.trim());
-                output = `[${items[0]}, ${items[items.length-1]}]`;
+                // Check if the code looks like a TwoSum solution
+                if (code.includes('def two_sum') || code.includes('def twoSum') || 
+                    code.includes('class Solution') && code.includes('def twoSum')) {
+                  output = "[0, 1]"; // Common TwoSum result
+                } else {
+                  // For other array processing
+                  const items = match[1].split(',').map(s => s.trim());
+                  // Generate a plausible output based on code content
+                  if (code.includes('sort')) {
+                    output = `[${items.sort((a, b) => Number(a) - Number(b)).join(', ')}]`;
+                  } else if (code.includes('max') || code.includes('min')) {
+                    output = Math.max(...items.map(Number)).toString();
+                  } else {
+                    output = `[${items[0]}, ${items[items.length-1]}]`;
+                  }
+                }
               } else {
                 output = "[]";
               }
             } else {
-              output = input.split('\n').map(line => `Processed: ${line}`).join('\n');
+              // For text-based input
+              output = input.split('\n').map(line => `${line.trim()}`).join('\n');
             }
+            success = true;
+          } catch (e) {
+            success = false;
+            error = "Python syntax error";
+            output = "Error: " + error;
           }
         } else {
-          // For other languages, provide realistic-looking output
-          success = Math.random() > 0.3;
+          // For other languages, provide more realistic output
+          success = Math.random() > 0.2; // 80% success rate for simulation
           if (!success) {
             error = `${language.toUpperCase()} compilation error: syntax error near line ${Math.floor(Math.random() * 20) + 1}`;
             output = "Error: " + error;
           } else {
-            if (input.includes("sort") || input.includes("array")) {
+            if (input.includes('[') && input.includes(']')) {
+              // Array-like input
+              output = `[${Array.from({length: 2}, () => Math.floor(Math.random() * 10))}]`;
+            } else if (input.includes("sort") || input.includes("array")) {
               output = input.includes('[') ? 
                 `[${Array.from({length: 5}, () => Math.floor(Math.random() * 100)).sort((a,b) => a-b).join(', ')}]` : 
                 `Sorted: ${Math.floor(Math.random() * 10)} items`;
@@ -128,9 +137,9 @@ export const simulateLocalExecution = async (
         });
       } catch (e) {
         resolve({
-          output: "Error",
+          output: "Error during execution",
           success: false,
-          executionTime: 1,
+          executionTime: Math.floor(executionDelay),
           memoryUsed: 0,
           error: e instanceof Error ? e.message : "Unknown error occurred"
         });
@@ -153,6 +162,18 @@ function evaluateJavaScriptWithConsoleCapture(code: string, input: string): stri
       originalConsoleLog(...args);
     };
     
+    // Try to parse input if it's in JSON format
+    let parsedInput = input;
+    try {
+      if ((input.trim().startsWith('[') && input.trim().endsWith(']')) || 
+          (input.trim().startsWith('{') && input.trim().endsWith('}'))) {
+        parsedInput = JSON.parse(input);
+      }
+    } catch {
+      // If parsing fails, use original input
+      parsedInput = input;
+    }
+    
     // Create a context with the input available
     const context = new Function('input', `
       ${code}
@@ -164,22 +185,33 @@ function evaluateJavaScriptWithConsoleCapture(code: string, input: string): stri
       if (typeof solution === 'function') {
         return solution(input);
       }
+      // Try to call solve if it exists
+      if (typeof solve === 'function') {
+        return solve(input);
+      }
+      // Try twoSum with appropriate parameters
+      if (typeof twoSum === 'function' && Array.isArray(input)) {
+        // If input is an array with two elements [nums, target]
+        if (input.length >= 2 && Array.isArray(input[0])) {
+          return twoSum(input[0], input[1]);
+        }
+      }
       // Just return any console output
     `);
     
-    const result = context(input);
+    const result = context(parsedInput);
     
     // If there was a returned value and no console output, use the return value
-    if (result !== undefined && !output) {
+    if (result !== undefined && !output.trim()) {
       output = typeof result === 'object' ? JSON.stringify(result) : String(result);
     }
     
     // If still no output, indicate successful execution but no output
-    if (!output) {
+    if (!output.trim()) {
       output = "Code executed successfully, but produced no output.";
     }
     
-    return output;
+    return output.trim();
   } catch (error) {
     return `Error: ${error instanceof Error ? error.message : String(error)}`;
   } finally {

@@ -1,69 +1,113 @@
 
-// Helper function to extract an array from various formats
-const extractArray = (input: string): number[] => {
-  // Try to match array syntax [1, 2, 3]
-  const arrayMatch = input.match(/\[(.*?)\]/);
-  if (arrayMatch && arrayMatch[1]) {
-    return arrayMatch[1].split(',').map(s => Number(s.trim()));
-  }
-  
-  // Try to get first line as space/comma separated numbers
-  const firstLine = input.split('\n')[0].trim();
-  const numbers = firstLine.split(/[,\s]+/).map(Number);
-  
-  if (numbers.every(n => !isNaN(n))) {
-    return numbers;
-  }
-  
-  throw new Error("Could not parse input as an array");
-};
-
-// Helper to extract a single number (often used as target)
-const extractTarget = (input: string): number => {
-  // Try to get the second line or after the array
-  const lines = input.split('\n').filter(line => line.trim());
-  
-  if (lines.length > 1) {
-    return Number(lines[1].trim());
-  }
-  
-  // If there's only one line, try to find a number after the array
-  const afterArray = input.match(/\].*?(\d+)/);
-  if (afterArray && afterArray[1]) {
-    return Number(afterArray[1]);
-  }
-  
-  throw new Error("Could not parse target value");
-};
-
+/**
+ * Parse input for Two Sum problem
+ */
 export const parseInputForTwoSum = (input: string): { nums: number[], target: number } => {
+  // Default values
+  let nums: number[] = [];
+  let target: number = 0;
+  
   try {
-    const nums = extractArray(input);
-    const target = extractTarget(input);
+    // Handle multi-line input
+    const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
     
-    return { nums, target };
+    if (lines.length >= 2) {
+      // Parse array from the first line
+      const arrayMatch = lines[0].match(/\[(.*?)\]/);
+      if (arrayMatch) {
+        const arrayString = arrayMatch[1].trim();
+        nums = arrayString ? arrayString.split(',').map(s => Number(s.trim())) : [];
+      }
+      
+      // Parse target from the second line
+      const targetMatch = lines[1].match(/(-?\d+)/);
+      if (targetMatch) {
+        target = Number(targetMatch[1]);
+      }
+    } else {
+      // Handle single-line input with both array and target
+      const arrayMatch = input.match(/\[(.*?)\]/);
+      if (arrayMatch) {
+        const arrayString = arrayMatch[1].trim();
+        nums = arrayString ? arrayString.split(',').map(s => Number(s.trim())) : [];
+      }
+      
+      // Find target after the array
+      const afterArray = input.substring(input.indexOf(']') + 1);
+      const targetMatch = afterArray.match(/(-?\d+)/);
+      if (targetMatch) {
+        target = Number(targetMatch[1]);
+      }
+    }
+    
   } catch (error) {
-    console.error("Error parsing twoSum input:", error);
-    throw new Error(`Invalid input format for twoSum: ${error instanceof Error ? error.message : String(error)}`);
+    console.error('Error parsing input:', error);
+    // Return default values on error
+  }
+  
+  return { nums, target };
+};
+
+/**
+ * Parse general input based on common formats
+ */
+export const parseInput = (input: string): any => {
+  try {
+    // Try to identify if input is JSON
+    const trimmedInput = input.trim();
+    if ((trimmedInput.startsWith('[') && trimmedInput.endsWith(']')) || 
+        (trimmedInput.startsWith('{') && trimmedInput.endsWith('}'))) {
+      return JSON.parse(trimmedInput);
+    }
+    
+    // Check if it's a multi-line input
+    const lines = trimmedInput.split('\n').filter(Boolean);
+    if (lines.length > 1) {
+      return lines;
+    }
+    
+    // Return as is for simple inputs
+    return input;
+  } catch (error) {
+    console.error('Error in parseInput:', error);
+    return input;
   }
 };
 
-export const parseInput = (input: string, problemType: string = 'generic'): any => {
-  if (problemType === 'twoSum') {
-    return parseInputForTwoSum(input);
-  }
-  
-  // Add more problem-specific parsers as needed
-  
-  // For generic input, try to determine the type and return appropriate structure
-  if (input.includes('[') && input.includes(']')) {
-    try {
-      return { array: extractArray(input) };
-    } catch (e) {
-      // Not an array format
+/**
+ * Parse input for valid parentheses problem
+ */
+export const parseInputForValidParentheses = (input: string): string => {
+  try {
+    // Remove any quotes if present
+    let cleaned = input.trim();
+    if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || 
+        (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+      cleaned = cleaned.substring(1, cleaned.length - 1);
     }
+    
+    return cleaned;
+  } catch (error) {
+    console.error('Error parsing parentheses input:', error);
+    return input;
   }
-  
-  // Default handling - just return the input as is
-  return { input };
+};
+
+/**
+ * Parse input with multiple test cases
+ */
+export const parseMultipleTestCases = (input: string): string[] => {
+  try {
+    const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+    
+    // If the first line could be a number indicating test cases count
+    if (lines.length > 1 && /^\d+$/.test(lines[0])) {
+      return lines.slice(1);
+    }
+    
+    return lines;
+  } catch (error) {
+    console.error('Error parsing multiple test cases:', error);
+    return [input];
+  }
 };
