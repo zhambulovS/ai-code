@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Certificate } from "@/components/profile/CertificatesCard";
 
 export interface UserProfile {
   id: string;
@@ -84,6 +85,26 @@ export const fetchUserAchievements = async (userId: string): Promise<Achievement
     ...achievement,
     earned_at,
   }));
+};
+
+export const fetchUserCertificates = async (userId: string): Promise<Certificate[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('certificates')
+      .select('*')
+      .eq('user_id', userId)
+      .order('issued_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching user certificates:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching user certificates:', error);
+    return [];
+  }
 };
 
 export const fetchFavoriteTags = async (userId: string): Promise<FavoriteTag[]> => {

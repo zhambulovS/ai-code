@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, AlertCircle, ArrowLeft, ArrowRight } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, ArrowLeft, ArrowRight, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,6 +16,7 @@ import {
   fetchCourseById
 } from "@/services/coursesService";
 import { checkCourseCompletion, createCourseCompletionAchievement } from "@/services/achievementsService";
+import { issueCertificate } from "@/services/certificatesService";
 
 export default function TestPage() {
   const { courseId, testId } = useParams<{ courseId: string; testId: string }>();
@@ -28,6 +29,7 @@ export default function TestPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [testResult, setTestResult] = useState<any>(null);
+  const [certificateIssued, setCertificateIssued] = useState(false);
   
   useEffect(() => {
     if (!user) {
@@ -70,6 +72,28 @@ export default function TestPage() {
         const isCompleted = await checkCourseCompletion(user?.id || '', courseId || '');
         
         if (isCompleted) {
+          // Issue certificate for course completion
+          if (data.score >= 75) {
+            const certificate = await issueCertificate(
+              user?.id || '',
+              courseId || '',
+              course.title,
+              data.score
+            );
+            
+            if (certificate) {
+              setCertificateIssued(true);
+              queryClient.invalidateQueries({ queryKey: ['certificates', user?.id] });
+              
+              toast({
+                title: "Certificate Issued!",
+                description: `You've earned a certificate for completing ${course.title}`,
+                variant: "default"
+              });
+            }
+          }
+          
+          // Also create achievement
           const achievement = await createCourseCompletionAchievement(
             user?.id || '',
             courseId || '',
@@ -185,6 +209,18 @@ export default function TestPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
+            {certificateIssued && (
+              <div className="flex items-center p-4 mb-6 bg-amber-50 border border-amber-200 rounded-lg">
+                <Award className="h-6 w-6 text-amber-500 mr-3" />
+                <div>
+                  <h3 className="font-medium text-amber-800">Certificate Earned!</h3>
+                  <p className="text-sm text-amber-700">
+                    You've earned a certificate for completing this course. View it in your profile.
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <div className="mb-4">
               <Progress value={testResult.score} className="h-2" />
             </div>
@@ -372,6 +408,12 @@ export default function TestPage() {
                 <p className="text-muted-foreground mt-1">
                   You must answer correctly to get a passing grade.
                 </p>
+                {test.passing_score >= 75 && (
+                  <p className="text-sm text-amber-600 mt-2 flex items-center">
+                    <Award className="h-4 w-4 mr-1" />
+                    Earn a certificate with 75%+ score
+                  </p>
+                )}
               </div>
             </CardFooter>
           </Card>

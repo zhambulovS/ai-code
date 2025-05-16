@@ -1,6 +1,7 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Star, ArrowRight } from "lucide-react";
+import { BookOpen, Star, ArrowRight, Award } from "lucide-react";
 import { Course } from "@/services/recommendations";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,12 @@ export function CourseRecommendations({ courses }: CourseRecommendationsProps) {
                 <div className="flex items-center mb-2">
                   <BookOpen className="h-5 w-5 mr-2 text-primary" />
                   <h3 className="font-medium text-lg">{course.title}</h3>
+                  {course.completed && (
+                    <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center">
+                      <Award className="h-3 w-3 mr-1" />
+                      Completed
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-gray-600 mb-2">{course.description}</p>
                 <div className="flex flex-wrap gap-2 mb-2">
