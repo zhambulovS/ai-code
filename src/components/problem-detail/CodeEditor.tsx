@@ -159,11 +159,11 @@ export function CodeEditor({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-200">Test Case {idx + 1}</p>
-                    {!result.passed && result.expected && result.actual && (
+                    {!result.passed && result.expected && result.output && (
                       <div className="mt-2 text-xs">
-                        <p className="text-gray-400">Input: <code className="text-gray-300 bg-gray-700/50 px-1 py-0.5 rounded">{result.input}</code></p>
+                        <p className="text-gray-400">Input: <code className="text-gray-300 bg-gray-700/50 px-1 py-0.5 rounded">{result.testCase?.input || 'N/A'}</code></p>
                         <p className="text-gray-400 mt-1">Expected: <code className="text-green-300 bg-gray-700/50 px-1 py-0.5 rounded">{result.expected}</code></p>
-                        <p className="text-gray-400 mt-1">Actual: <code className="text-red-300 bg-gray-700/50 px-1 py-0.5 rounded">{result.actual}</code></p>
+                        <p className="text-gray-400 mt-1">Actual: <code className="text-red-300 bg-gray-700/50 px-1 py-0.5 rounded">{result.output}</code></p>
                       </div>
                     )}
                     {result.error && (
