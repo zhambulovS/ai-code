@@ -19,10 +19,36 @@ export const normalizeOutput = (output: string): string => {
       // If parsing fails, do basic normalization
       return trimmed
         .replace(/\s+/g, '')  // Remove all whitespace
-        .replace(/'/g, '"');  // Replace single quotes with double quotes
+        .replace(/'/g, '"')   // Replace single quotes with double quotes
+        .replace(/,\]/g, ']'); // Remove trailing commas
     }
   }
   
-  // For other outputs, normalize whitespace
+  // Handle dictionary/object output
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}'))) {
+    try {
+      // Try to parse as JSON
+      const parsed = JSON.parse(trimmed.replace(/'/g, '"'));
+      return JSON.stringify(parsed);
+    } catch {
+      // If parsing fails, do basic normalization
+      return trimmed
+        .replace(/\s+/g, '')  // Remove all whitespace
+        .replace(/'/g, '"')   // Replace single quotes with double quotes
+        .replace(/,}/g, '}'); // Remove trailing commas
+    }
+  }
+
+  // For number outputs, ensure consistent formatting
+  if (!isNaN(Number(trimmed))) {
+    return Number(trimmed).toString();
+  }
+  
+  // For boolean outputs
+  if (trimmed.toLowerCase() === 'true' || trimmed.toLowerCase() === 'false') {
+    return trimmed.toLowerCase();
+  }
+  
+  // For other outputs, normalize whitespace and trim
   return trimmed.replace(/\s+/g, ' ');
 };
