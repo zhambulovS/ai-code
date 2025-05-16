@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Achievement, ActivityLog, FavoriteTag } from "@/services/profileService";
-import { TagStats, AIRecommendation } from "@/services/recommendationService";
+import { TagStats, AIRecommendation, Course } from "@/services/recommendations/types";
 import { StatsCard } from "./StatsCard";
 import { ActivityGraph } from "./ActivityGraph";
 import { AchievementsCard } from "./AchievementsCard";
@@ -11,16 +11,6 @@ import { TagStatsChart } from "./TagStatsChart";
 import { CourseRecommendations } from "./CourseRecommendations";
 import { Certificate } from "./CertificatesCard";
 import { useTranslation } from "react-i18next";
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  difficulty: string;
-  rating: number;
-  isCompleted?: boolean;
-}
 
 interface ProfileTabsProps {
   activeTab: string;

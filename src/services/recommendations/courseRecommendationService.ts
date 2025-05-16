@@ -58,7 +58,7 @@ export const getRecommendedCourses = async (userId: string): Promise<Course[]> =
       description: course.description,
       difficulty: course.difficulty,
       tags: course.tags || [],
-      rating: 4.5 // Add default rating since it doesn't exist in the database
+      rating: 4.5 // Ensure rating is always provided
     }));
   } catch (error) {
     console.error('Error getting recommended courses:', error);
@@ -117,7 +117,7 @@ export const getLearningRecommendations = async (problemId: string): Promise<Cou
       description: course.description,
       difficulty: course.difficulty,
       tags: course.tags || [],
-      rating: 4.5 // Add default rating since it doesn't exist in the database
+      rating: 4.5 // Ensure rating is always provided
     }));
   } catch (error) {
     console.error('Error getting learning recommendations:', error);

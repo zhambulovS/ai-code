@@ -7,7 +7,8 @@ export interface Course {
   description: string;
   difficulty: string;
   tags: string[];
-  rating?: number;
+  rating: number; // Changed from optional to required
+  isCompleted?: boolean; // Added to match the interface used in CourseRecommendations
 }
 
 export interface TagStats {
