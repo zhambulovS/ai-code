@@ -67,13 +67,13 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
                 </div>
                 <div className="space-y-1 text-sm">
                   <div className="bg-white bg-opacity-50 p-2 rounded">
-                    <span className="font-medium">Input:</span> {result.testCase.input.replace(/\n/g, ', ')}
+                    <span className="font-medium">Input:</span> <pre className="inline whitespace-pre-wrap">{result.testCase.input}</pre>
                   </div>
                   <div className="bg-white bg-opacity-50 p-2 rounded">
-                    <span className="font-medium">Your output:</span> {result.output}
+                    <span className="font-medium">Your output:</span> <pre className="inline whitespace-pre-wrap">{result.output}</pre>
                   </div>
                   <div className="bg-white bg-opacity-50 p-2 rounded">
-                    <span className="font-medium">Expected output:</span> {result.expected}
+                    <span className="font-medium">Expected output:</span> <pre className="inline whitespace-pre-wrap">{result.expected}</pre>
                   </div>
                   <div className="flex flex-wrap gap-x-4 mt-2">
                     <div className="flex items-center">
@@ -87,6 +87,11 @@ export function TestResults({ results, isRunning = false, onRerun }: TestResults
                       </div>
                     )}
                   </div>
+                  {result.error && (
+                    <div className="bg-red-50 p-2 rounded mt-2 text-red-800">
+                      <span className="font-medium">Error:</span> <pre className="whitespace-pre-wrap">{result.error}</pre>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

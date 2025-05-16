@@ -37,7 +37,8 @@ export function CodeEditor({
       
       <div className="flex justify-end space-x-3">
         <Button 
-          className="bg-green-600 hover:bg-green-700"
+          variant="outline"
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-base"
           onClick={onRun}
           disabled={isRunning}
         >
@@ -54,6 +55,7 @@ export function CodeEditor({
           )}
         </Button>
         <Button
+          className="bg-blue-600 hover:bg-blue-700 px-6 py-2 text-base"
           onClick={onSubmit}
           disabled={isSubmitting}
         >
@@ -64,7 +66,7 @@ export function CodeEditor({
             </>
           ) : (
             <>
-              <CheckCircle className="mr-2 h-4 w-4" />
+              <CheckCircle className="mr-2 h-5 w-5" />
               Отправить решение
             </>
           )}

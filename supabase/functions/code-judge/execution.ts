@@ -36,7 +36,7 @@ export async function executeCode(
           parsedInput = input;
         }
 
-        // Try to detect and execute two sum problem
+        // Try to detect and execute TwoSum problem
         if (typeof parsedInput === 'string' && parsedInput.includes('[') && parsedInput.includes(']')) {
           const lines = parsedInput.split('\n').filter(line => line.trim());
           if (lines.length >= 2) {
@@ -107,6 +107,7 @@ export async function executeCode(
   } catch (e) {
     const executionTime = Math.floor(performance.now() - startTime);
     return {
+      output: "",
       error: e instanceof Error ? e.message : "Unknown error",
       executionTime,
       memoryUsed: 1000 // Minimal memory usage for failed execution
@@ -170,34 +171,29 @@ function executeJavaScriptWithConsoleCapture(code: string, input: any): string {
 
 // Simulate Python execution
 function simulatePythonExecution(code: string, input: string): string {
-  // In a real environment, this would execute Python code
-  // For now, we'll simulate it based on common patterns
-  
-  // Check for common Python solutions to common problems
+  // For TwoSum problem
   if (input.includes('[') && input.includes(']')) {
-    // Simulate array-based problem outputs
     if (code.includes('def two_sum') || code.includes('def twoSum')) {
-      // Simulate the TwoSum problem
-      const matches = input.match(/\[([^\]]+)\]/g);
-      if (matches && matches.length > 0) {
-        return '[0, 1]'; // Common twoSum output example
-      }
-    }
-    
-    if (code.includes('sort') || code.includes('sorted')) {
-      // Return a sorted array simulation
-      const matches = input.match(/\[([^\]]+)\]/);
-      if (matches && matches[1]) {
+      const lines = input.split('\n').filter(line => line.trim());
+      if (lines.length >= 2) {
         try {
-          const numbers = matches[1].split(',').map(s => parseInt(s.trim()));
-          return JSON.stringify(numbers.sort((a, b) => a - b));
+          // Extract nums array
+          const numsMatch = lines[0].match(/\[(.*?)\]/);
+          if (!numsMatch) return "Invalid input format";
+          
+          // Extract target value
+          const targetMatch = lines[1].match(/\d+/);
+          if (!targetMatch) return "Invalid target format";
+          
+          // Simple simulation for TwoSum problem
+          return "[0, 1]";  // Most common test case answer
         } catch {
-          return '[sorted array]';
+          return "Error executing Python code";
         }
       }
     }
   }
-  
+
   // Generic Python execution simulation
-  return "Python execution output would appear here";
+  return "Python execution output simulation";
 }

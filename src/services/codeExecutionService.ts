@@ -123,18 +123,25 @@ export const runTestCases = async (
       console.log("Judge function returned test results:", data);
       
       if (data.testResults && Array.isArray(data.testResults)) {
-        return data.testResults.map((result: any) => ({
-          testCase: testCases.find(tc => tc.id === result.id) || {
-            input: result.input,
-            expected_output: result.expected
-          },
-          output: result.output,
-          expected: result.expected,
-          passed: result.passed,
-          executionTime: result.executionTime,
-          memoryUsed: result.memoryUsed,
-          error: result.error
-        }));
+        return data.testResults.map((result: any) => {
+          // Fix the comparison of expected and actual outputs
+          const normalizedOutput = normalizeOutput(result.output);
+          const normalizedExpected = normalizeOutput(result.expected);
+          const passed = normalizedOutput === normalizedExpected;
+          
+          return {
+            testCase: testCases.find(tc => tc.id === result.id) || {
+              input: result.input,
+              expected_output: result.expected
+            },
+            output: result.output,
+            expected: result.expected,
+            passed,
+            executionTime: result.executionTime,
+            memoryUsed: result.memoryUsed,
+            error: result.error
+          };
+        });
       }
       
       throw new Error("Invalid test results format");

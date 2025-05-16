@@ -9,6 +9,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to normalize output for comparison
+function normalizeOutput(output: string): string {
+  if (!output) return "";
+  
+  const trimmed = output.trim();
+  
+  // Handle array output normalization
+  if ((trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      // Try to parse as JSON and re-stringify to ensure consistent format
+      const parsed = JSON.parse(trimmed.replace(/'/g, '"'));
+      return JSON.stringify(parsed);
+    } catch {
+      // If parsing fails, do basic normalization
+      return trimmed
+        .replace(/\s+/g, '')  // Remove all whitespace
+        .replace(/'/g, '"');  // Replace single quotes with double quotes
+    }
+  }
+  
+  // For other outputs, normalize whitespace
+  return trimmed.replace(/\s+/g, ' ');
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -78,8 +102,8 @@ serve(async (req) => {
     for (const testCase of testCases) {
       const result = await executeCode(code, language, testCase.input, timeLimit, memoryLimit);
       
-      const normalizedOutput = result.output?.trim().replace(/\s+/g, " ") || "";
-      const normalizedExpected = testCase.expected_output.trim().replace(/\s+/g, " ");
+      const normalizedOutput = normalizeOutput(result.output || "");
+      const normalizedExpected = normalizeOutput(testCase.expected_output);
       const passed = normalizedOutput === normalizedExpected;
       
       if (!passed) allPassed = false;
