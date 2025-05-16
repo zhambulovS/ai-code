@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ActivityLog, Achievement, FavoriteTag } from "@/services/profileService";
-import { Course, TagStats, AIRecommendation } from "@/services/recommendationService";
+import { Achievement, ActivityLog, FavoriteTag } from "@/services/profileService";
+import { TagStats, AIRecommendation } from "@/services/recommendationService";
 import { StatsCard } from "./StatsCard";
 import { ActivityGraph } from "./ActivityGraph";
 import { AchievementsCard } from "./AchievementsCard";
@@ -9,13 +9,25 @@ import { FavoriteTagsCard } from "./FavoriteTagsCard";
 import { ActivityCalendar } from "./ActivityCalendar";
 import { TagStatsChart } from "./TagStatsChart";
 import { CourseRecommendations } from "./CourseRecommendations";
+import { Certificate } from "./CertificatesCard";
 import { useTranslation } from "react-i18next";
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  difficulty: string;
+  rating: number;
+  isCompleted?: boolean;
+}
 
 interface ProfileTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   activityLog: ActivityLog[];
   achievements: Achievement[];
+  certificates?: Certificate[];
   favoriteTags: FavoriteTag[];
   tagStats: TagStats[];
   recommendedCourses: Course[];
@@ -26,6 +38,7 @@ export function ProfileTabs({
   setActiveTab,
   activityLog,
   achievements,
+  certificates = [],
   favoriteTags,
   tagStats,
   recommendedCourses,
@@ -49,7 +62,7 @@ export function ProfileTabs({
         {/* Activity and Achievements */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ActivityGraph activityLog={activityLog} />
-          <AchievementsCard achievements={achievements} />
+          <AchievementsCard achievements={achievements} certificates={certificates} />
         </div>
 
         {/* Tags */}

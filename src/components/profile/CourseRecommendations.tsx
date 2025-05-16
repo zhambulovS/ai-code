@@ -2,9 +2,18 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Star, ArrowRight, Award } from "lucide-react";
-import { Course } from "@/services/recommendations";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  difficulty: string;
+  rating: number;
+  isCompleted?: boolean; // Changed from completed to isCompleted
+}
 
 interface CourseRecommendationsProps {
   courses: Course[];
@@ -29,7 +38,7 @@ export function CourseRecommendations({ courses }: CourseRecommendationsProps) {
                 <div className="flex items-center mb-2">
                   <BookOpen className="h-5 w-5 mr-2 text-primary" />
                   <h3 className="font-medium text-lg">{course.title}</h3>
-                  {course.completed && (
+                  {course.isCompleted && ( // Changed from completed to isCompleted
                     <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center">
                       <Award className="h-3 w-3 mr-1" />
                       Completed

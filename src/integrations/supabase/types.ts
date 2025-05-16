@@ -69,6 +69,44 @@ export type Database = {
           },
         ]
       }
+      certificates: {
+        Row: {
+          certificate_url: string | null
+          course_id: string
+          course_title: string
+          id: string
+          issued_at: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          certificate_url?: string | null
+          course_id: string
+          course_title: string
+          id?: string
+          issued_at?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          certificate_url?: string | null
+          course_id?: string
+          course_title?: string
+          id?: string
+          issued_at?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           created_at: string | null

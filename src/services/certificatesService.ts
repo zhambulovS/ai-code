@@ -1,16 +1,18 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Certificate } from "@/components/profile/CertificatesCard";
 import { createCourseCompletionAchievement } from "@/services/achievementsService";
 
 // Minimum score required to earn a certificate (75%)
 const CERTIFICATION_THRESHOLD = 75;
 
-interface CertificateData {
+export interface Certificate {
+  id: string;
   course_id: string;
   user_id: string;
   course_title: string;
   score: number;
+  issued_at: string;
+  certificate_url?: string;
 }
 
 export const issueCertificate = async (
@@ -36,7 +38,7 @@ export const issueCertificate = async (
 
     if (existingCert) {
       console.log("Certificate already exists for this course");
-      return existingCert;
+      return existingCert as Certificate;
     }
 
     // Create certificate
@@ -60,7 +62,7 @@ export const issueCertificate = async (
     // Also create an achievement for getting a certificate
     await createCourseCompletionAchievement(userId, courseId, courseTitle);
 
-    return certificate;
+    return certificate as Certificate;
   } catch (error) {
     console.error("Error in issueCertificate:", error);
     return null;
@@ -80,7 +82,7 @@ export const fetchUserCertificates = async (userId: string): Promise<Certificate
       throw error;
     }
 
-    return data || [];
+    return data as Certificate[] || [];
   } catch (error) {
     console.error("Error in fetchUserCertificates:", error);
     return [];
@@ -100,7 +102,7 @@ export const verifyCertificate = async (certificateId: string): Promise<Certific
       return null;
     }
 
-    return data;
+    return data as Certificate;
   } catch (error) {
     console.error("Error in verifyCertificate:", error);
     return null;

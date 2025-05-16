@@ -10,6 +10,7 @@ import {
   fetchUserAchievements,
   fetchFavoriteTags,
   fetchActivityLog,
+  fetchUserCertificates,
 } from "@/services/profileService";
 
 import {
@@ -41,6 +42,12 @@ export default function ProfilePage() {
   const { data: achievements = [], isLoading: isAchievementsLoading } = useQuery({
     queryKey: ['achievements', user?.id],
     queryFn: () => fetchUserAchievements(user?.id || ''),
+    enabled: !!user,
+  });
+
+  const { data: certificates = [], isLoading: isCertificatesLoading } = useQuery({
+    queryKey: ['certificates', user?.id],
+    queryFn: () => fetchUserCertificates(user?.id || ''),
     enabled: !!user,
   });
 
@@ -122,6 +129,7 @@ export default function ProfilePage() {
         setActiveTab={setActiveTab}
         activityLog={activityLog}
         achievements={achievements}
+        certificates={certificates}
         favoriteTags={favoriteTags}
         tagStats={tagStats}
         recommendedCourses={recommendedCourses}
