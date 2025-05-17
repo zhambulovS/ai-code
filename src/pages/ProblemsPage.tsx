@@ -6,7 +6,7 @@ import { Check, Search, Filter, ArrowUpDown } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SeedProblemsButton } from "@/components/problem-detail/SeedProblemsButton";
+import { SeedDatabaseButton } from "@/components/admin/SeedDatabaseButton";
 import { useToast } from "@/hooks/use-toast";
 import { TableSkeleton } from "@/components/SkeletonUI";
 import {
@@ -157,7 +157,7 @@ export default function ProblemsPage() {
               <Button onClick={() => refetch()}>Повторить попытку</Button>
             </div>
             <div className="flex justify-center mt-4">
-              <SeedProblemsButton />
+              <SeedDatabaseButton />
             </div>
           </CardContent>
         </Card>
@@ -171,7 +171,7 @@ export default function ProblemsPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Задачи по программированию</CardTitle>
-            <SeedProblemsButton />
+            <SeedDatabaseButton />
           </div>
         </CardHeader>
         <CardContent>
