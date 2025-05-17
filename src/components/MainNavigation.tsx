@@ -25,10 +25,10 @@ export default function MainNavigation() {
   }, [location.pathname]);
 
   const navItems = [
-    { path: "/", label: t('navigation.home') },
-    { path: "/problems", label: t('navigation.problems') },
-    { path: "/courses", label: t('navigation.courses') },
-    { path: "/leaderboard", label: t('navigation.leaderboard') },
+    { path: "/", label: t('nav.home') },
+    { path: "/problems", label: t('nav.problems') },
+    { path: "/courses", label: t('nav.courses') },
+    { path: "/leaderboard", label: t('nav.leaderboard') },
   ];
 
   return (
@@ -36,7 +36,7 @@ export default function MainNavigation() {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-6 md:gap-8 lg:gap-10">
           <Link to="/" className="font-bold text-xl flex items-center">
-            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">CodeMaster</span>
+            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">CodeCrafters</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -81,23 +81,23 @@ export default function MainNavigation() {
               </Link>
               <Link to="/profile">
                 <Button variant="outline" size="sm">
-                  {t('navigation.profile')}
+                  {t('nav.profile')}
                 </Button>
               </Link>
               <Button variant="ghost" size="sm" onClick={logout}>
-                {t('navigation.logout')}
+                {t('nav.logout')}
               </Button>
             </>
           ) : (
             <>
               <Link to="/login">
                 <Button variant="ghost" size="sm">
-                  {t('navigation.login')}
+                  {t('nav.login')}
                 </Button>
               </Link>
               <Link to="/register">
                 <Button variant="default" size="sm">
-                  {t('navigation.register')}
+                  {t('nav.register')}
                 </Button>
               </Link>
             </>
@@ -137,23 +137,23 @@ export default function MainNavigation() {
                   </Link>
                   <Link to="/profile" className="w-full">
                     <Button variant="outline" size="sm" className="w-full">
-                      {t('navigation.profile')}
+                      {t('nav.profile')}
                     </Button>
                   </Link>
                   <Button variant="ghost" size="sm" onClick={logout} className="w-full">
-                    {t('navigation.logout')}
+                    {t('nav.logout')}
                   </Button>
                 </>
               ) : (
                 <>
                   <Link to="/login" className="w-full">
                     <Button variant="ghost" size="sm" className="w-full">
-                      {t('navigation.login')}
+                      {t('nav.login')}
                     </Button>
                   </Link>
                   <Link to="/register" className="w-full">
                     <Button variant="default" size="sm" className="w-full">
-                      {t('navigation.register')}
+                      {t('nav.register')}
                     </Button>
                   </Link>
                 </>

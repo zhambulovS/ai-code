@@ -27,6 +27,7 @@ i18n
   .init({
     resources,
     lng: defaultLanguage,
+    fallbackLng: 'en', // Use English if translation is missing
     keySeparator: '.',
     interpolation: {
       escapeValue: false // react already safes from xss
@@ -38,11 +39,13 @@ i18n
 
 // Set html lang attribute
 document.documentElement.lang = defaultLanguage;
+document.documentElement.dir = defaultLanguage === 'kk' ? 'ltr' : 'ltr'; // Add RTL support if needed in future
 
 // Add a language change listener to update localStorage
 i18n.on('languageChanged', (lng) => {
   localStorage.setItem('language', lng);
   document.documentElement.lang = lng;
+  document.documentElement.dir = lng === 'kk' ? 'ltr' : 'ltr'; // Add RTL support if needed in future
 });
 
 export default i18n;

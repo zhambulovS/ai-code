@@ -92,9 +92,14 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
@@ -147,6 +152,18 @@
   .animate-slide-in-right {
     animation: slideInRight 0.4s ease-out forwards;
   }
+
+  .animate-slide-in-bottom {
+    animation: slideInBottom 0.4s ease-out forwards;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-sm bg-background/80 border border-border/50;
+  }
+  
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1 hover:shadow-md;
+  }
 }
 
 @keyframes fadeIn {
@@ -181,3 +198,60 @@
     opacity: 1;
   }
 }
+
+@keyframes slideInBottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Helps remove FOUC (Flash of Unstyled Content) */
+.no-fouc {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.fouc-ready {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Language-specific styles if needed */
+.lang-en {
+  /* English-specific styles */
+}
+
+.lang-kk {
+  /* Kazakh-specific styles */
+}
+
+/* Remove App.css redundant rules since we're using Tailwind */

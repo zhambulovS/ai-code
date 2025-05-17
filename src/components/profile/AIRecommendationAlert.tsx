@@ -43,14 +43,18 @@ export function AIRecommendationAlert({ recommendations }: AIRecommendationAlert
     const isLast = index === recommendations.length - 1;
 
     return (
-      <div key={index} className={`py-3 ${!isLast ? "border-b" : ""}`}>
+      <div key={index} className={`py-3 ${!isLast ? "border-b border-primary/10" : ""}`}>
         <div className="flex items-start gap-3">
           <div className="mt-0.5">
             {getIcon(recommendation.type)}
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-medium mb-1">{t(recommendation.title)}</h4>
-            <p className="text-sm text-muted-foreground mb-2">{t(recommendation.description)}</p>
+            <h4 className="text-sm font-medium mb-1">
+              {recommendation.translationKey ? t(recommendation.translationKey) : t(recommendation.title)}
+            </h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              {recommendation.descriptionKey ? t(recommendation.descriptionKey) : t(recommendation.description)}
+            </p>
             
             {recommendation.progress !== undefined && (
               <div className="mb-3">
@@ -77,7 +81,7 @@ export function AIRecommendationAlert({ recommendations }: AIRecommendationAlert
   };
 
   return (
-    <Alert className="mb-8 border-primary/20 bg-primary/5">
+    <Alert className="mb-8 border-primary/20 bg-primary/5 shadow-sm">
       <div className="flex items-center mb-2">
         <TrendingUp className="h-4 w-4 text-primary mr-2" />
         <AlertTitle>{t('profile.aiRecommendations')}</AlertTitle>
