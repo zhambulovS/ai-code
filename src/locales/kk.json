@@ -54,5 +54,58 @@
     "editProfile": "Профильді өңдеу",
     "darkModeEnabled": "Қараңғы режим қосылды",
     "lightModeEnabled": "Жарық режим қосылды"
+  },
+  "language": {
+    "switchedToEnglish": "Тіл ағылшынға өзгертілді",
+    "switchedToKazakh": "Тіл қазақшаға өзгертілді"
+  },
+  "login": {
+    "title": "Қайта келуіңізбен",
+    "description": "Жалғастыру үшін аккаунтыңызға кіріңіз",
+    "cardTitle": "Кіру",
+    "cardDescription": "Аккаунтыңызға кіру үшін мәліметтеріңізді енгізіңіз",
+    "email": "Электрондық пошта",
+    "password": "Құпия сөз",
+    "forgotPassword": "Құпия сөзді ұмыттыңыз ба?",
+    "rememberMe": "Мені есте сақтау",
+    "signIn": "Кіру",
+    "signingIn": "Кіру...",
+    "noAccount": "Аккаунтыңыз жоқ па?",
+    "signUp": "Тіркелу",
+    "emailPlaceholder": "your.email@example.com",
+    "passwordPlaceholder": "••••••••",
+    "success": "Сәтті",
+    "loginSuccess": "Сіз сәтті кірдіңіз",
+    "error": "Қате",
+    "fillAllFields": "Барлық өрістерді толтырыңыз",
+    "invalidCredentials": "Қате электрондық пошта немесе құпия сөз"
+  },
+  "problem": {
+    "selectLanguage": "Тілді таңдау",
+    "resetCode": "Кодты қалпына келтіру",
+    "learningResources": "Оқу ресурстары",
+    "resourcesDescription": "Бұл есепті шешуге көмектесетін ресурстар",
+    "recommendedStudy": "Ұсынылған оқу материалдары",
+    "codingTips": "Кодтау кеңестері",
+    "tip1": "Есепті кішірек бөліктерге бөліңіз",
+    "tip2": "Шешіміңізді әр түрлі кіріс мәліметтермен тексеріңіз",
+    "tip3": "Шешіміңізде шекті жағдайларды қарастырыңыз",
+    "getHint": "Кеңес алу",
+    "hint": "Кеңес",
+    "hintLimitReached": "Сіз бұл есеп үшін кеңестердің максималды санына жеттіңіз",
+    "hintsUsed": "Сіз бұл есеп үшін 3 кеңестің {{count}} пайдаландыңыз",
+    "personalizedAdvice": "Жекелендірілген кеңес",
+    "getPersonalizedAdvice": "Жекелендірілген кеңес алу",
+    "loginRequired": "Кіру қажет",
+    "loginToGetHint": "Кеңестер алу үшін жүйеге кіріңіз",
+    "noHintsAvailable": "Кеңестер жоқ",
+    "runFailedTestsForHint": "Кеңестер алу үшін кейбір тесттерді орындаңыз және оларды сәтсіз аяқтаңыз",
+    "noFailedTests": "Кеңес алу үшін сәтсіз тесттер жоқ",
+    "errorGettingHint": "Кеңес алу кезінде қате орын алды. Кейінірек қайталап көріңіз."
+  },
+  "common": {
+    "error": "Қате",
+    "loading": "Жүктелуде",
+    "close": "Жабу"
   }
 }

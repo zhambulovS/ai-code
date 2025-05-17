@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,14 +20,15 @@ const LoginPage = () => {
   const { toast } = useToast();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: t("login.error"),
+        description: t("login.fillAllFields"),
         variant: "destructive",
       });
       return;
@@ -41,15 +43,15 @@ const LoginPage = () => {
       }
 
       toast({
-        title: "Success",
-        description: "You have been logged in successfully",
+        title: t("login.success"),
+        description: t("login.loginSuccess"),
       });
       
       // Navigate will happen via the auth hook
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Invalid email or password",
+        title: t("login.error"),
+        description: error.message || t("login.invalidCredentials"),
         variant: "destructive",
       });
     } finally {
@@ -58,30 +60,30 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to your account to continue
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">{t("login.title")}</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            {t("login.description")}
           </p>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <CardTitle>{t("login.cardTitle")}</CardTitle>
             <CardDescription>
-              Enter your credentials to access your account
+              {t("login.cardDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("login.email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder={t("login.emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -90,16 +92,16 @@ const LoginPage = () => {
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("login.password")}</Label>
                   <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
+                    {t("login.forgotPassword")}
                   </Link>
                 </div>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder={t("login.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -124,7 +126,7 @@ const LoginPage = () => {
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(!!checked)}
                 />
-                <Label htmlFor="remember-me" className="text-sm">Remember me</Label>
+                <Label htmlFor="remember-me" className="text-sm">{t("login.rememberMe")}</Label>
               </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -134,22 +136,22 @@ const LoginPage = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Signing in...
+                    {t("login.signingIn")}
                   </div>
                 ) : (
                   <div className="flex items-center">
                     <LogIn className="mr-2 h-4 w-4" />
-                    Sign in
+                    {t("login.signIn")}
                   </div>
                 )}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {t("login.noAccount")}{" "}
               <Link to="/register" className="text-primary font-medium hover:underline">
-                Sign up
+                {t("login.signUp")}
               </Link>
             </p>
           </CardFooter>

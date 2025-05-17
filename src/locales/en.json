@@ -54,5 +54,58 @@
     "editProfile": "Edit Profile",
     "darkModeEnabled": "Dark mode enabled",
     "lightModeEnabled": "Light mode enabled"
+  },
+  "language": {
+    "switchedToEnglish": "Language changed to English",
+    "switchedToKazakh": "Language changed to Kazakh"
+  },
+  "login": {
+    "title": "Welcome back",
+    "description": "Sign in to your account to continue",
+    "cardTitle": "Login",
+    "cardDescription": "Enter your credentials to access your account",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "emailPlaceholder": "your.email@example.com",
+    "passwordPlaceholder": "••••••••",
+    "success": "Success",
+    "loginSuccess": "You have been logged in successfully",
+    "error": "Error",
+    "fillAllFields": "Please fill in all fields",
+    "invalidCredentials": "Invalid email or password"
+  },
+  "problem": {
+    "selectLanguage": "Select language",
+    "resetCode": "Reset code",
+    "learningResources": "Learning Resources",
+    "resourcesDescription": "Resources to help you solve this problem",
+    "recommendedStudy": "Recommended Study Materials",
+    "codingTips": "Coding Tips",
+    "tip1": "Break down the problem into smaller parts",
+    "tip2": "Test your solution with different inputs",
+    "tip3": "Consider edge cases in your solution",
+    "getHint": "Get Hint",
+    "hint": "Hint",
+    "hintLimitReached": "You have reached the maximum number of hints for this problem",
+    "hintsUsed": "You have used {{count}} of 3 hints for this problem",
+    "personalizedAdvice": "Personalized Advice",
+    "getPersonalizedAdvice": "Get Personalized Advice",
+    "loginRequired": "Login Required",
+    "loginToGetHint": "Please log in to get hints",
+    "noHintsAvailable": "No Hints Available",
+    "runFailedTestsForHint": "Run some tests and fail them to get hints",
+    "noFailedTests": "No failed tests to get hints for",
+    "errorGettingHint": "Error getting hint. Please try again later."
+  },
+  "common": {
+    "error": "Error",
+    "loading": "Loading",
+    "close": "Close"
   }
 }

@@ -20,7 +20,7 @@ const resources = {
 const storedLanguage = localStorage.getItem('language');
 const browserLanguage = navigator.language.split('-')[0];
 const defaultLanguage = (storedLanguage && ['en', 'kk'].includes(storedLanguage)) ? storedLanguage : 
-                       (['en', 'kk'].includes(browserLanguage)) ? browserLanguage : 'en';
+                      (['en', 'kk'].includes(browserLanguage)) ? browserLanguage : 'en';
 
 i18n
   .use(initReactI18next)
@@ -35,5 +35,8 @@ i18n
       useSuspense: false
     }
   });
+
+// Set html lang attribute
+document.documentElement.lang = defaultLanguage;
 
 export default i18n;

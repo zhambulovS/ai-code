@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Globe } from "lucide-react";
 
 export const LanguageSelector = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export const LanguageSelector = () => {
     
     // Show a toast notification when language changes
     toast({
-      title: newLanguage === 'en' ? 'Language changed to English' : 'Тіл қазақшаға өзгертілді',
+      title: newLanguage === 'en' ? t('language.switchedToEnglish') : t('language.switchedToKazakh'),
       duration: 2000
     });
   };
