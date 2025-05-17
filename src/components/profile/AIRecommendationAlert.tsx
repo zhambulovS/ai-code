@@ -50,10 +50,10 @@ export function AIRecommendationAlert({ recommendations }: AIRecommendationAlert
           </div>
           <div className="flex-1">
             <h4 className="text-sm font-medium mb-1">
-              {recommendation.translationKey ? t(recommendation.translationKey) : t(recommendation.title)}
+              {recommendation.title ? t(recommendation.title) : recommendation.title}
             </h4>
             <p className="text-sm text-muted-foreground mb-2">
-              {recommendation.descriptionKey ? t(recommendation.descriptionKey) : t(recommendation.description)}
+              {recommendation.description ? t(recommendation.description) : recommendation.description}
             </p>
             
             {recommendation.progress !== undefined && (
