@@ -38,5 +38,21 @@
     "coursesDescription": "Сіздің есеп шешу үлгілері мен жақсарту салаларына негізделген",
     "rank": "Рейтинг",
     "level": "Деңгей"
+  },
+  "settings": {
+    "title": "Параметрлер",
+    "appearance": "Сыртқы түрі",
+    "appearanceDescription": "CodeMaster қолданбасының сыртқы түрін өзгерту",
+    "theme": "Тақырып",
+    "lightMode": "Жарық режим",
+    "darkMode": "Қараңғы режим",
+    "language": "Тіл",
+    "languageDescription": "Қалаған тілді таңдаңыз",
+    "selectLanguage": "Тілді таңдау",
+    "account": "Аккаунт",
+    "accountDescription": "Аккаунт параметрлерін және профиль ақпаратын басқару",
+    "editProfile": "Профильді өңдеу",
+    "darkModeEnabled": "Қараңғы режим қосылды",
+    "lightModeEnabled": "Жарық режим қосылды"
   }
 }

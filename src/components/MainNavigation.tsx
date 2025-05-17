@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -32,11 +32,11 @@ export default function MainNavigation() {
   ];
 
   return (
-    <header className="bg-background border-b border-border sticky top-0 z-50">
+    <header className="bg-background backdrop-blur-md border-b border-border sticky top-0 z-50 transition-all">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-6 md:gap-8 lg:gap-10">
           <Link to="/" className="font-bold text-xl flex items-center">
-            CodeMaster
+            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">CodeMaster</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -74,6 +74,11 @@ export default function MainNavigation() {
           
           {!loading && user ? (
             <>
+              <Link to="/settings">
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Settings">
+                  <Settings className="h-[1.2rem] w-[1.2rem]" />
+                </Button>
+              </Link>
               <Link to="/profile">
                 <Button variant="outline" size="sm">
                   {t('navigation.profile')}
@@ -102,7 +107,7 @@ export default function MainNavigation() {
 
       {/* Mobile Menu */}
       {isMenuOpen && isMobile && (
-        <div className="md:hidden border-t border-border">
+        <div className="md:hidden border-t border-border animate-fade-in">
           <div className="container px-4 py-3 flex flex-col">
             <nav className="flex flex-col space-y-3 py-2">
               {navItems.map((item) => (
@@ -124,6 +129,12 @@ export default function MainNavigation() {
               
               {!loading && user ? (
                 <>
+                  <Link to="/settings" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      {t('settings.title')}
+                    </Button>
+                  </Link>
                   <Link to="/profile" className="w-full">
                     <Button variant="outline" size="sm" className="w-full">
                       {t('navigation.profile')}

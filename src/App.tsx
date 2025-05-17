@@ -10,6 +10,7 @@ import ProblemsPage from "./pages/ProblemsPage";
 import ProblemDetailPage from "./pages/ProblemDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import CoursesPage from "./pages/CoursesPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
@@ -30,7 +31,18 @@ function ScrollToTop() {
   return null;
 }
 
+// Apply theme from localStorage
+const applyStoredTheme = () => {
+  const storedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.classList.add(storedTheme);
+};
+
 function App() {
+  // Apply theme on initial render
+  useEffect(() => {
+    applyStoredTheme();
+  }, []);
+
   return (
     <QueryProvider>
       <Router>
@@ -45,6 +57,7 @@ function App() {
               <Route path="problems/:id" element={<ProblemDetailPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="edit-profile" element={<EditProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="courses" element={<CoursesPage />} />
               <Route path="courses/:id" element={<CourseDetailPage />} />

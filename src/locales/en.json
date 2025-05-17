@@ -38,5 +38,21 @@
     "coursesDescription": "Based on your problem-solving patterns and areas for improvement",
     "rank": "Rank",
     "level": "Level"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "appearanceDescription": "Customize how CodeMaster looks on your device",
+    "theme": "Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "languageDescription": "Select your preferred language",
+    "selectLanguage": "Choose language",
+    "account": "Account",
+    "accountDescription": "Manage your account settings and profile information",
+    "editProfile": "Edit Profile",
+    "darkModeEnabled": "Dark mode enabled",
+    "lightModeEnabled": "Light mode enabled"
   }
 }
