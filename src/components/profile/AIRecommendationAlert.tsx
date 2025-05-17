@@ -5,7 +5,6 @@ import {
   Lightbulb, 
   BookOpen, 
   Code, 
-  ChevronRight,
   ArrowRight,
   BookMarked,
   TrendingUp
@@ -50,8 +49,8 @@ export function AIRecommendationAlert({ recommendations }: AIRecommendationAlert
             {getIcon(recommendation.type)}
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-medium mb-1">{recommendation.title}</h4>
-            <p className="text-sm text-muted-foreground mb-2">{recommendation.description}</p>
+            <h4 className="text-sm font-medium mb-1">{t(recommendation.title)}</h4>
+            <p className="text-sm text-muted-foreground mb-2">{t(recommendation.description)}</p>
             
             {recommendation.progress !== undefined && (
               <div className="mb-3">

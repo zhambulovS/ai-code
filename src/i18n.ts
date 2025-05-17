@@ -39,4 +39,10 @@ i18n
 // Set html lang attribute
 document.documentElement.lang = defaultLanguage;
 
+// Add a language change listener to update localStorage
+i18n.on('languageChanged', (lng) => {
+  localStorage.setItem('language', lng);
+  document.documentElement.lang = lng;
+});
+
 export default i18n;

@@ -1,6 +1,7 @@
 
 import { AIRecommendation } from "./types";
 import { getUserCourseProgress, getUserSubmissions } from "./userStatsService";
+import { supabase } from "@/integrations/supabase/client";
 
 // Get AI-powered recommendations for the user
 export const getAIRecommendations = async (userId: string): Promise<AIRecommendation[]> => {
@@ -11,8 +12,12 @@ export const getAIRecommendations = async (userId: string): Promise<AIRecommenda
       getUserCourseProgress(userId)
     ]);
     
-    // In a real implementation, this would query an AI model
-    // For simplicity, we simulate a response based on user history
+    // Get user's profile data for better personalization
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
     
     const recommendations: AIRecommendation[] = [];
     
@@ -22,37 +27,78 @@ export const getAIRecommendations = async (userId: string): Promise<AIRecommenda
       if (inProgressCourse) {
         recommendations.push({
           type: "continue",
-          title: `Продолжить курс: ${inProgressCourse.title}`,
-          description: `Вы прошли ${inProgressCourse.progress}% этого курса. Продолжайте обучение!`,
+          title: 'profile.continueCourse',
+          description: 'profile.courseProgressDescription',
           link: `/courses/${inProgressCourse.id}`,
           progress: inProgressCourse.progress
         });
       }
     }
     
-    // Add problem recommendation
-    recommendations.push({
-      type: "problem",
-      title: "Two Sum с ограничениями",
-      description: "Попробуйте эту задачу, чтобы улучшить ваши навыки работы с массивами и оптимизации",
-      difficulty: "Medium",
-      link: "/problems/42"
-    });
+    // Get user's problem statistics
+    const { data: problemStats } = await supabase
+      .from('submissions')
+      .select('problem_id, status')
+      .eq('user_id', userId);
+    
+    // Get problems user has attempted but not solved
+    if (problemStats) {
+      const attemptedButNotSolved = problemStats
+        .filter(s => s.status !== 'accepted')
+        .map(s => s.problem_id)
+        .filter((value, index, self) => self.indexOf(value) === index);
+      
+      if (attemptedButNotSolved.length > 0) {
+        // Get a challenging problem the user attempted but didn't solve
+        const { data: challengingProblem } = await supabase
+          .from('problems')
+          .select('*')
+          .in('id', attemptedButNotSolved)
+          .limit(1)
+          .single();
+        
+        if (challengingProblem) {
+          recommendations.push({
+            type: "problem",
+            title: 'profile.tryAgainProblem',
+            description: 'profile.problemRetryDescription',
+            difficulty: challengingProblem.difficulty,
+            link: `/problems/${challengingProblem.id}`
+          });
+        }
+      }
+    }
     
     // Add tip based on solved problems statistics
     recommendations.push({
       type: "tip",
-      title: "Улучшите свои навыки динамического программирования",
-      description: "Похоже, у вас возникают трудности с задачами DP. Попробуйте разбивать их на подзадачи и строить решение итеративно."
+      title: 'profile.improveProgrammingSkills',
+      description: 'profile.programmingTipDescription'
     });
     
-    // Add course recommendation
-    recommendations.push({
-      type: "course",
-      title: "Алгоритмы на графах для соревновательного программирования",
-      description: "Этот курс поможет вам освоить концепции теории графов, которые часто встречаются на соревнованиях",
-      link: "/courses/graph-algorithms"
-    });
+    // Add course recommendation based on user level
+    const userLevel = profileData?.level || 'Beginner';
+    const difficultyMap = {
+      'Beginner': 'easy',
+      'Intermediate': 'medium',
+      'Advanced': 'hard'
+    };
+    
+    const { data: recommendedCourse } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('difficulty', difficultyMap[userLevel as keyof typeof difficultyMap] || 'medium')
+      .limit(1)
+      .single();
+    
+    if (recommendedCourse) {
+      recommendations.push({
+        type: "course",
+        title: 'profile.recommendedCourse',
+        description: 'profile.courseRecommendationDescription',
+        link: `/courses/${recommendedCourse.id}`
+      });
+    }
     
     return recommendations;
   } catch (error) {
@@ -69,25 +115,56 @@ export const getPersonalizedHint = async (
   previousAttempts: number
 ): Promise<string> => {
   try {
-    // In a real implementation, this would query an AI model for a personalized hint
-    // based on user data and previous attempts
+    // Implement a more sophisticated hint system
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error("User must be logged in to get personalized hints");
+    }
     
-    // Simulate responses for different difficulty levels and number of attempts
-    if (previousAttempts === 0) {
-      return "Начните с внимательного прочтения условия задачи. Обратите внимание на граничные случаи.";
-    } else if (previousAttempts === 1) {
-      if (difficulty === "easy") {
-        return "Подумайте о использовании хеш-таблицы для оптимизации поиска.";
-      } else if (difficulty === "medium") {
-        return "Рассмотрите возможность использования динамического программирования для кеширования промежуточных результатов.";
-      } else {
-        return "Для сложных задач часто требуется комбинация нескольких алгоритмов. Попробуйте разбить проблему на подзадачи.";
-      }
+    // Get the user's history with similar problems
+    const { data: problemData } = await supabase
+      .from('problems')
+      .select('tags')
+      .eq('id', problemId)
+      .single();
+      
+    if (!problemData || !problemData.tags) {
+      return "Try breaking the problem into smaller subproblems and solving them individually.";
+    }
+    
+    const tags = problemData.tags;
+    
+    // Check the user's progress on problems with similar tags
+    const { data: similarProblems } = await supabase
+      .from('problems')
+      .select('id')
+      .contains('tags', tags)
+      .neq('id', problemId);
+      
+    if (!similarProblems || similarProblems.length === 0) {
+      return "This problem is unique, but applying basic algorithmic techniques might help solve it.";
+    }
+    
+    const similarProblemIds = similarProblems.map(p => p.id);
+    
+    // Check if the user has solved similar problems
+    const { data: solvedSimilar } = await supabase
+      .from('submissions')
+      .select('problem_id')
+      .eq('user_id', user.user.id)
+      .eq('status', 'accepted')
+      .in('problem_id', similarProblemIds);
+      
+    // Generate a personalized hint
+    if (!solvedSimilar || solvedSimilar.length === 0) {
+      return "You might find it helpful to first solve some easier problems with tags: " + tags.join(", ");
+    } else if (solvedSimilar.length < similarProblems.length / 2) {
+      return "You've already solved some similar problems. Remember the techniques you used for them.";
     } else {
-      return "Не сдавайтесь! Попробуйте взглянуть на задачу с другой стороны. Иногда решение может быть проще, чем кажется.";
+      return "You have good experience with similar problems. Try applying the same approaches as before, perhaps with some modifications.";
     }
   } catch (error) {
     console.error('Error getting personalized hint:', error);
-    return "Произошла ошибка при получении подсказки.";
+    return "Error getting personalized hint. Please try again later.";
   }
 };

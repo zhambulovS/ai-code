@@ -11,6 +11,7 @@ const Layout = () => {
   // Set the document's lang attribute whenever the language changes
   useEffect(() => {
     document.documentElement.lang = i18n.language;
+    document.documentElement.dir = i18n.dir();
   }, [i18n.language]);
 
   return (
