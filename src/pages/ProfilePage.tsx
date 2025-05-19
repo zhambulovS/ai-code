@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 import {
   fetchUserProfile,
@@ -26,6 +27,7 @@ import { ProfileTabs } from "@/components/profile/ProfileTabs";
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -99,9 +101,9 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Please log in</h1>
-        <p className="mb-6">You need to be logged in to view this page.</p>
-        <Button onClick={() => navigate("/login")}>Log in</Button>
+        <h1 className="text-2xl font-bold mb-4">{t('auth.loginRequired')}</h1>
+        <p className="mb-6">{t('auth.loginToViewPage')}</p>
+        <Button onClick={() => navigate("/login")}>{t('auth.login')}</Button>
       </div>
     );
   }
@@ -109,8 +111,8 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Profile not found</h1>
-        <p className="mb-6">We couldn't load your profile data. Please try again later.</p>
+        <h1 className="text-2xl font-bold mb-4">{t('profile.profileNotFound')}</h1>
+        <p className="mb-6">{t('profile.profileLoadError')}</p>
       </div>
     );
   }

@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 const SettingsPage = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [theme, setTheme] = useState<"light" | "dark">(
     localStorage.getItem("theme") as "light" | "dark" || "light"
   );
@@ -53,8 +54,8 @@ const SettingsPage = () => {
       
       toast({
         title: value === "en" 
-          ? "Language changed to English" 
-          : "Тіл қазақшаға өзгертілді",
+          ? t("language.switchedToEnglish") 
+          : t("language.switchedToKazakh"),
         duration: 2000,
       });
     }

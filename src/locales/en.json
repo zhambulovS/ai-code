@@ -37,7 +37,9 @@
     "loginSuccess": "Logged in successfully",
     "loginError": "Login failed. Please check your credentials.",
     "registerSuccess": "Account created successfully",
-    "registerError": "Registration failed. Please try again."
+    "registerError": "Registration failed. Please try again.",
+    "loginRequired": "Login Required",
+    "loginToViewPage": "You need to be logged in to view this page."
   },
   "login": {
     "title": "Sign in to your account",
@@ -91,7 +93,26 @@
     "improveProgrammingSkills": "Improve your programming skills",
     "programmingTipDescription": "Practice breaking down complex problems into smaller, manageable pieces.",
     "recommendedCourse": "Recommended course for your level",
-    "courseRecommendationDescription": "This course matches your current skill level and will help you improve."
+    "courseRecommendationDescription": "This course matches your current skill level and will help you improve.",
+    "profileNotFound": "Profile not found",
+    "profileLoadError": "We couldn't load your profile data. Please try again later.",
+    "loginToEditProfile": "You need to be logged in to edit your profile.",
+    "failedToLoadProfile": "Failed to load profile data.",
+    "avatarUpdated": "Avatar Updated",
+    "avatarUpdateSuccess": "Your profile picture has been successfully updated.",
+    "avatarUploadError": "An error occurred while uploading the avatar. Please make sure the image is less than 2MB and in a supported format (jpg, png, etc).",
+    "profileUpdated": "Profile Updated",
+    "profileUpdateSuccess": "Your profile has been successfully updated.",
+    "profileUpdateError": "An error occurred while updating your profile.",
+    "institution": "Institution",
+    "country": "Country",
+    "aboutMe": "About Me",
+    "fullNamePlaceholder": "John Doe",
+    "institutionPlaceholder": "University or organization",
+    "countryPlaceholder": "Your country",
+    "bioPlaceholder": "Tell us about yourself...",
+    "updateProfileInfo": "Update your profile information",
+    "uploadAvatar": "Upload Avatar"
   },
   "problem": {
     "difficulty": "Difficulty",
@@ -171,11 +192,19 @@
     "notifications": "Notifications",
     "account": "Account",
     "preferences": "Preferences",
-    "dark": "Dark",
-    "light": "Light",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
     "system": "System",
-    "save": "Save Changes",
-    "changesSaved": "Your changes have been saved"
+    "saveChanges": "Save Changes",
+    "changesSaved": "Your changes have been saved",
+    "appearance": "Appearance",
+    "appearanceDescription": "Customize how the application looks and feels",
+    "selectLanguage": "Select Language",
+    "languageDescription": "Change the application language",
+    "accountDescription": "Manage your account settings",
+    "darkModeEnabled": "Dark mode enabled",
+    "lightModeEnabled": "Light mode enabled",
+    "editProfile": "Edit Profile"
   },
   "language": {
     "switchedToEnglish": "Switched to English",
@@ -191,7 +220,13 @@
   "common": {
     "loading": "Loading",
     "error": "Error",
-    "close": "Close"
+    "close": "Close",
+    "backToProfile": "Back to Profile",
+    "saveChanges": "Save Changes",
+    "uploading": "Uploading...",
+    "saving": "Saving...",
+    "uploadError": "Upload Error",
+    "updateError": "Update Error"
   },
   "courses": {
     "title": "Courses",

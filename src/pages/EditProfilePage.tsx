@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Upload, User, Save, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +47,7 @@ export default function EditProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -63,8 +65,8 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (!user) {
       toast({
-        title: "Login Required",
-        description: "You need to be logged in to edit your profile.",
+        title: t("auth.loginRequired"),
+        description: t("profile.loginToEditProfile"),
         variant: "destructive",
       });
       navigate("/login");
@@ -87,8 +89,8 @@ export default function EditProfilePage() {
       } catch (error) {
         console.error("Error loading user profile:", error);
         toast({
-          title: "Error",
-          description: "Failed to load profile data.",
+          title: t("common.error"),
+          description: t("profile.failedToLoadProfile"),
           variant: "destructive",
         });
       } finally {
@@ -97,7 +99,7 @@ export default function EditProfilePage() {
     };
 
     loadUserProfile();
-  }, [user, navigate, form, toast]);
+  }, [user, navigate, form, toast, t]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !event.target.files || event.target.files.length === 0) {
@@ -136,8 +138,8 @@ export default function EditProfilePage() {
         });
 
         toast({
-          title: "Avatar Updated",
-          description: "Your profile picture has been successfully updated.",
+          title: t("profile.avatarUpdated"),
+          description: t("profile.avatarUpdateSuccess"),
         });
       } else {
         throw new Error("Could not get public URL for avatar");
@@ -145,8 +147,8 @@ export default function EditProfilePage() {
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
       toast({
-        title: "Upload Error",
-        description: "An error occurred while uploading the avatar. Please make sure the image is less than 2MB and in a supported format (jpg, png, etc).",
+        title: t("common.uploadError"),
+        description: t("profile.avatarUploadError"),
         variant: "destructive",
       });
     } finally {
@@ -165,16 +167,16 @@ export default function EditProfilePage() {
       });
 
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
+        title: t("profile.profileUpdated"),
+        description: t("profile.profileUpdateSuccess"),
       });
 
       navigate("/profile");
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Update Error",
-        description: "An error occurred while updating your profile.",
+        title: t("common.updateError"),
+        description: t("profile.profileUpdateError"),
         variant: "destructive",
       });
     } finally {
@@ -191,14 +193,14 @@ export default function EditProfilePage() {
           onClick={() => navigate("/profile")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Profile
+          {t("common.backToProfile")}
         </Button>
 
         <Card>
           <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
+            <CardTitle>{t("profile.editProfile")}</CardTitle>
             <CardDescription>
-              Update your profile information
+              {t("profile.updateProfileInfo")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -238,7 +240,7 @@ export default function EditProfilePage() {
                       disabled={uploading}
                     >
                       <Upload className="h-4 w-4 mr-2" />
-                      {uploading ? "Uploading..." : "Upload Avatar"}
+                      {uploading ? t("common.uploading") : t("profile.uploadAvatar")}
                     </Button>
                   </div>
                 </div>
@@ -250,9 +252,9 @@ export default function EditProfilePage() {
                       name="full_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Full Name</FormLabel>
+                          <FormLabel>{t("auth.fullName")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <Input placeholder={t("profile.fullNamePlaceholder")} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -263,10 +265,10 @@ export default function EditProfilePage() {
                       name="institution"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Institution</FormLabel>
+                          <FormLabel>{t("profile.institution")}</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="University or organization" 
+                              placeholder={t("profile.institutionPlaceholder")} 
                               {...field} 
                               value={field.value || ""} 
                             />
@@ -280,10 +282,10 @@ export default function EditProfilePage() {
                       name="country"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Country</FormLabel>
+                          <FormLabel>{t("profile.country")}</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="Your country" 
+                              placeholder={t("profile.countryPlaceholder")} 
                               {...field} 
                               value={field.value || ""} 
                             />
@@ -297,10 +299,10 @@ export default function EditProfilePage() {
                       name="bio"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>About Me</FormLabel>
+                          <FormLabel>{t("profile.aboutMe")}</FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="Tell us about yourself..." 
+                              placeholder={t("profile.bioPlaceholder")} 
                               className="resize-none h-20" 
                               {...field} 
                               value={field.value || ""} 
@@ -316,7 +318,7 @@ export default function EditProfilePage() {
                       disabled={isLoading}
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      {isLoading ? "Saving..." : "Save Changes"}
+                      {isLoading ? t("common.saving") : t("common.saveChanges")}
                     </Button>
                   </form>
                 </Form>

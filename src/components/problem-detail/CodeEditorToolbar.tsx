@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, BookOpen, Code, Settings } from "lucide-react";
-import { HintButton } from "@/components/problem-detail/HintButton";
+import { HintButton } from "@/components/problem-detail/hints";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { getLearningRecommendations } from "@/services/recommendations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

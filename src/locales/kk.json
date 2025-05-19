@@ -37,7 +37,9 @@
     "loginSuccess": "Сәтті кірдіңіз",
     "loginError": "Кіру сәтсіз аяқталды. Деректерді тексеріңіз.",
     "registerSuccess": "Аккаунт сәтті құрылды",
-    "registerError": "Тіркелу сәтсіз аяқталды. Қайталап көріңіз."
+    "registerError": "Тіркелу сәтсіз аяқталды. Қайталап көріңіз.",
+    "loginRequired": "Кіру қажет",
+    "loginToViewPage": "Бұл бетті көру үшін жүйеге кіру қажет."
   },
   "login": {
     "title": "Аккаунтқа кіру",
@@ -91,7 +93,26 @@
     "improveProgrammingSkills": "Бағдарламалау дағдыларыңызды жетілдіріңіз",
     "programmingTipDescription": "Күрделі мәселелерді кішірек бөліктерге бөлуді үйреніңіз.",
     "recommendedCourse": "Деңгейіңізге сәйкес ұсынылған курс",
-    "courseRecommendationDescription": "Бұл курс сіздің қазіргі деңгейіңізге сәйкес келеді және дағдыларыңызды жетілдіруге көмектеседі."
+    "courseRecommendationDescription": "Бұл курс сіздің қазіргі деңгейіңізге сәйкес келеді және дағдыларыңызды жетілдіруге көмектеседі.",
+    "profileNotFound": "Профиль табылмады",
+    "profileLoadError": "Профиль деректерін жүктеу мүмкін болмады. Әрекетті қайталап көріңіз.",
+    "loginToEditProfile": "Профильді өңдеу үшін жүйеге кіру қажет.",
+    "failedToLoadProfile": "Профиль деректерін жүктеу сәтсіз аяқталды.",
+    "avatarUpdated": "Аватар жаңартылды",
+    "avatarUpdateSuccess": "Сіздің профиль суретіңіз сәтті жаңартылды.",
+    "avatarUploadError": "Аватарды жүктеу кезінде қате орын алды. Сурет көлемі 2МБ-тан аз және қолдау көрсетілетін форматта (jpg, png, т.б.) екендігіне көз жеткізіңіз.",
+    "profileUpdated": "Профиль жаңартылды",
+    "profileUpdateSuccess": "Сіздің профиліңіз сәтті жаңартылды.",
+    "profileUpdateError": "Профильді жаңарту кезінде қате орын алды.",
+    "institution": "Мекеме",
+    "country": "Ел",
+    "aboutMe": "Мен туралы",
+    "fullNamePlaceholder": "Толық атыңыз",
+    "institutionPlaceholder": "Университет немесе ұйым",
+    "countryPlaceholder": "Елі",
+    "bioPlaceholder": "Өзіңіз туралы айтып беріңіз...",
+    "updateProfileInfo": "Профиль ақпаратын жаңарту",
+    "uploadAvatar": "Аватарды жүктеу"
   },
   "problem": {
     "difficulty": "Күрделілік",
@@ -171,11 +192,19 @@
     "notifications": "Хабарландырулар",
     "account": "Аккаунт",
     "preferences": "Қалаулар",
-    "dark": "Қараңғы",
-    "light": "Жарық",
+    "darkMode": "Қараңғы режим",
+    "lightMode": "Жарық режим",
     "system": "Жүйелік",
-    "save": "Өзгерістерді сақтау",
-    "changesSaved": "Өзгерістеріңіз сақталды"
+    "saveChanges": "Өзгерістерді сақтау",
+    "changesSaved": "Өзгерістеріңіз сақталды",
+    "appearance": "Сыртқы түрі",
+    "appearanceDescription": "Қолданбаның көрінісін реттеу",
+    "selectLanguage": "Тілді таңдау",
+    "languageDescription": "Қолданба тілін өзгерту",
+    "accountDescription": "Аккаунт баптауларын басқару",
+    "darkModeEnabled": "Қараңғы режим қосылды",
+    "lightModeEnabled": "Жарық режим қосылды",
+    "editProfile": "Профильді өңдеу"
   },
   "language": {
     "switchedToEnglish": "Ағылшын тіліне ауыстырылды",
@@ -191,7 +220,13 @@
   "common": {
     "loading": "Жүктелуде",
     "error": "Қате",
-    "close": "Жабу"
+    "close": "Жабу",
+    "backToProfile": "Профильге оралу",
+    "saveChanges": "Өзгерістерді сақтау",
+    "uploading": "Жүктеу...",
+    "saving": "Сақтау...",
+    "uploadError": "Жүктеу қатесі",
+    "updateError": "Жаңарту қатесі"
   },
   "courses": {
     "title": "Курстар",
