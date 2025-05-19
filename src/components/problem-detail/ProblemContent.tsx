@@ -1,10 +1,10 @@
-
 import { ProblemDescription } from "@/components/problem-detail/ProblemDescription";
 import { CodeEditorToolbar } from "@/components/problem-detail/CodeEditorToolbar";
 import { CodeEditor } from "@/components/problem-detail/CodeEditor";
 import { TestResults } from "@/components/problem-detail/TestResults";
 import { TestResult } from "@/services/codeExecutionService";
 import codeTemplates from "@/components/problem-detail/codeTemplates";
+import { HintButton } from "@/components/problem-detail/hints";
 
 interface ProblemContentProps {
   problemId: number;
