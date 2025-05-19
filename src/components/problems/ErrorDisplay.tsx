@@ -15,15 +15,15 @@ export function ErrorDisplay({ onRetry }: ErrorDisplayProps) {
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="text-center text-red-600">
-          {t("problems.errorTitle") || "Ошибка загрузки задач"}
+          {t("problems.errorTitle")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-center">
-          {t("problems.errorDescription") || "Произошла ошибка при загрузке задач. Пожалуйста, попробуйте позже."}
+          {t("problems.errorDescription")}
         </p>
         <div className="flex justify-center mt-4">
-          <Button onClick={onRetry}>{t("common.retry") || "Повторить попытку"}</Button>
+          <Button onClick={onRetry}>{t("common.retry") || "Retry"}</Button>
         </div>
         <div className="flex justify-center mt-4">
           <SeedDatabaseButton />

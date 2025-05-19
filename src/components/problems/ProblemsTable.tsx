@@ -48,11 +48,11 @@ export function ProblemsTable({
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
       case "easy":
-        return t("problems.easy") || "Легкий";
+        return t("problems.easy");
       case "medium":
-        return t("problems.medium") || "Средний";
+        return t("problems.medium");
       case "hard":
-        return t("problems.hard") || "Сложный";
+        return t("problems.hard");
       default:
         return difficulty;
     }
@@ -66,7 +66,7 @@ export function ProblemsTable({
     return (
       <div className="text-center py-10">
         <p className="text-gray-500">
-          {t("problems.noProblems") || "Нет задач, соответствующих заданным фильтрам."}
+          {t("problems.noProblems")}
         </p>
       </div>
     );
@@ -77,10 +77,10 @@ export function ProblemsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16 text-center">{t("problems.id") || "№"}</TableHead>
+            <TableHead className="w-16 text-center">{t("problems.id")}</TableHead>
             <TableHead className="cursor-pointer" onClick={() => handleSort("title")}>
               <div className="flex items-center">
-                {t("problems.title") || "Название"}
+                {t("problems.title")}
                 {sortField === "title" && (
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 )}
@@ -88,16 +88,16 @@ export function ProblemsTable({
             </TableHead>
             <TableHead className="cursor-pointer" onClick={() => handleSort("difficulty")}>
               <div className="flex items-center">
-                {t("problems.difficulty") || "Сложность"}
+                {t("problems.difficulty")}
                 {sortField === "difficulty" && (
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 )}
               </div>
             </TableHead>
-            <TableHead>{t("problems.tags") || "Теги"}</TableHead>
+            <TableHead>{t("problems.tags")}</TableHead>
             <TableHead className="cursor-pointer text-right" onClick={() => handleSort("acceptance_rate")}>
               <div className="flex items-center justify-end">
-                {t("problems.acceptanceRate") || "Процент решения"}
+                {t("problems.acceptanceRate")}
                 {sortField === "acceptance_rate" && (
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 )}

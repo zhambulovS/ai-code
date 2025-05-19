@@ -30,7 +30,7 @@ export function ProblemFilters({
       <div className="relative flex-1">
         <Search className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
         <Input
-          placeholder={t("problems.searchPlaceholder") || "Поиск по названию или тегам..."}
+          placeholder={t("problems.searchPlaceholder")}
           className="pl-8"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -42,13 +42,13 @@ export function ProblemFilters({
           onValueChange={setDifficultyFilter}
         >
           <SelectTrigger>
-            <SelectValue placeholder={t("problems.difficulty") || "Сложность"} />
+            <SelectValue placeholder={t("problems.difficulty")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t("problems.all") || "Все"}</SelectItem>
-            <SelectItem value="easy">{t("problems.easy") || "Легкий"}</SelectItem>
-            <SelectItem value="medium">{t("problems.medium") || "Средний"}</SelectItem>
-            <SelectItem value="hard">{t("problems.hard") || "Сложный"}</SelectItem>
+            <SelectItem value="all">{t("problems.all")}</SelectItem>
+            <SelectItem value="easy">{t("problems.easy")}</SelectItem>
+            <SelectItem value="medium">{t("problems.medium")}</SelectItem>
+            <SelectItem value="hard">{t("problems.hard")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

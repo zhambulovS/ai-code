@@ -1,4 +1,3 @@
-
 {
   "app": {
     "name": "CodeCrafters",
@@ -110,7 +109,8 @@
     "fullNamePlaceholder": "John Doe",
     "institutionPlaceholder": "University or organization",
     "countryPlaceholder": "Your country",
-    "bioPlaceholder": "Tell us about yourself...",
+    "bioPlaceholder": "Tell us about yourself..."
+    ,
     "updateProfileInfo": "Update your profile information",
     "uploadAvatar": "Upload Avatar"
   },
@@ -153,7 +153,10 @@
     "noHintsAvailable": "No Hints Available",
     "runFailedTestsForHint": "Please run the tests first to get a hint",
     "noFailedTests": "No failed tests found",
-    "errorGettingHint": "Error getting hint. Please try again."
+    "errorGettingHint": "Error getting hint. Please try again.",
+    "notFound": "Problem not found",
+    "doesNotExist": "The requested problem does not exist or was removed.",
+    "returnToList": "Return to problems list"
   },
   "course": {
     "start": "Start Course",
@@ -226,7 +229,8 @@
     "uploading": "Uploading...",
     "saving": "Saving...",
     "uploadError": "Upload Error",
-    "updateError": "Update Error"
+    "updateError": "Update Error",
+    "retry": "Retry"
   },
   "courses": {
     "title": "Courses",
@@ -236,5 +240,23 @@
       "advanced": "Advanced"
     },
     "noCourses": "No courses available. Use the button above to add sample courses."
+  },
+  "problems": {
+    "title": "Programming Problems",
+    "searchPlaceholder": "Search by title or tags...",
+    "difficulty": "Difficulty",
+    "all": "All",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "id": "ID",
+    "title": "Title",
+    "tags": "Tags",
+    "acceptanceRate": "Acceptance Rate",
+    "noProblems": "No problems match your filters.",
+    "errorTitle": "Error Loading Problems",
+    "errorDescription": "An error occurred while loading problems. Please try again later.",
+    "demoProblemAdded": "Demo Problems Added",
+    "demoAddedDescription": "Demo problems were automatically added to the database."
   }
 }

@@ -5,8 +5,10 @@ import { useProblemsData } from "@/hooks/useProblemsData";
 import { ProblemFilters } from "@/components/problems/ProblemFilters";
 import { ProblemsTable } from "@/components/problems/ProblemsTable";
 import { ErrorDisplay } from "@/components/problems/ErrorDisplay";
+import { useTranslation } from "react-i18next";
 
 export default function ProblemsPage() {
+  const { t } = useTranslation();
   const {
     filteredProblems,
     isLoading,
@@ -34,7 +36,7 @@ export default function ProblemsPage() {
       <Card className="mb-6">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Задачи по программированию</CardTitle>
+            <CardTitle>{t("problems.title")}</CardTitle>
             <SeedDatabaseButton />
           </div>
         </CardHeader>
