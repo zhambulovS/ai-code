@@ -39,6 +39,26 @@
     "registerSuccess": "Account created successfully",
     "registerError": "Registration failed. Please try again."
   },
+  "login": {
+    "title": "Sign in to your account",
+    "description": "Enter your credentials to access your account",
+    "cardTitle": "Welcome back",
+    "cardDescription": "Enter your credentials to access your account",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
+    "signingIn": "Signing in...",
+    "signIn": "Sign in",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "error": "Login Error",
+    "fillAllFields": "Please fill all fields",
+    "invalidCredentials": "Invalid email or password",
+    "success": "Success"
+  },
   "profile": {
     "editProfile": "Edit Profile",
     "overview": "Overview",
@@ -101,7 +121,18 @@
     "codingTips": "Coding Tips",
     "tip1": "Break down complex problems into smaller sub-problems",
     "tip2": "Test your solution with various edge cases",
-    "tip3": "Consider time and space complexity in your solution"
+    "tip3": "Consider time and space complexity in your solution",
+    "personalizedAdvice": "Personalized Advice",
+    "hint": "Hint",
+    "hintLimitReached": "You've reached the maximum number of hints for this problem.",
+    "hintsUsed": "You've used {{count}} out of {{max}} hints",
+    "getPersonalizedAdvice": "Get Personalized Advice",
+    "loginRequired": "Login Required",
+    "loginToGetHint": "Please log in to get hints",
+    "noHintsAvailable": "No Hints Available",
+    "runFailedTestsForHint": "Please run the tests first to get a hint",
+    "noFailedTests": "No failed tests found",
+    "errorGettingHint": "Error getting hint. Please try again."
   },
   "course": {
     "start": "Start Course",
@@ -156,5 +187,19 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "copyright": "© 2025 CodeCrafters. All rights reserved."
+  },
+  "common": {
+    "loading": "Loading",
+    "error": "Error",
+    "close": "Close"
+  },
+  "courses": {
+    "title": "Courses",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "noCourses": "No courses available. Use the button above to add sample courses."
   }
 }

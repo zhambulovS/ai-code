@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 
@@ -44,7 +44,7 @@ const LoginPage = () => {
 
       toast({
         title: t("login.success"),
-        description: t("login.loginSuccess"),
+        description: t("auth.loginSuccess"),
       });
       
       // Navigate will happen via the auth hook

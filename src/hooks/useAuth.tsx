@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 // Create Authentication Context
 interface AuthContextType {
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Set up auth state listener first
@@ -37,14 +39,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (event === 'SIGNED_OUT') {
           toast({
-            title: "Вы вышли из системы",
-            description: "Вы успешно вышли из своей учетной записи",
+            title: t("auth.logout"),
+            description: t("auth.logoutSuccess"),
           });
           navigate('/login');
         } else if (event === 'SIGNED_IN') {
           toast({
-            title: "Вы вошли в систему",
-            description: "Добро пожаловать!",
+            title: t("auth.loginSuccess"),
+            description: t("auth.welcomeBack"),
           });
           // Navigate to profile page on successful sign in
           navigate('/profile');
@@ -66,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, t]);
 
   const login = async (email: string, password: string) => {
     try {

@@ -32,8 +32,8 @@ export default function CoursesPage() {
       } catch (error) {
         console.error("Error loading courses:", error);
         toast({
-          title: t("errors.loadingFailed"),
-          description: t("errors.coursesLoadFailed"),
+          title: t("common.error"),
+          description: t("courses.loadError", "Failed to load courses. Please try again."),
           variant: "destructive",
         });
       } finally {
